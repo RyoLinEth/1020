@@ -1,5 +1,10 @@
-import navbarLogo from './wp-content/uploads/sites/40/2022/01/LOGO2.png'
+import Logo from '../img/1020/1020_Word.png'
+import Logo2 from '../img/1020/1020.jpg'
 import React, { useState, useEffect } from 'react';
+import { ethers } from 'ethers';
+import StakingABI from '../abi/stakingABI.json'
+import '../css/About.css'
+
 
 const NumberCounter = ({ targetNumber }) => {
     const [currentNumber, setCurrentNumber] = useState(0);
@@ -40,9 +45,6 @@ const NumberCounter = ({ targetNumber }) => {
     return <div id="counter">{currentNumber}</div>;
 };
 
-
-
-
 const ArcSquare = () => {
 
     const arcStyle = {
@@ -62,55 +64,179 @@ const ArcSquare = () => {
     );
 };
 
-const Navbar = () => {
+const Navbar = ({ setLan, defaultAccountChange }) => {
+    const [language, setLanguage] = useState("EN");
+    const [defaultAccount, setDefaultAccount] = useState(null)
+    const [connectButtonText, setConnectButtonText] = useState("Connect Wallet")
+
+    const text =
+    {
+        en: 'Connect Wallet',
+        ch: '連接錢包'
+    }
+
+    const handleLanguageChange = () => {
+        if (language === "EN") {
+            setLanguage("CH")
+            setLan("CH")
+            return;
+        }
+        if (language === "CH") {
+            setLanguage("EN")
+            setLan("EN")
+            return;
+        }
+    }
+
+    useEffect(() => {
+        changingAccount();
+    }, [defaultAccount])
+
+    const changingAccount = async () => {
+        if (window.ethereum) {
+            window.ethereum.on('accountsChanged', () => {
+                connectWalletHandler()
+            })
+            window.ethereum.on('chainChanged', () => {
+                connectWalletHandler()
+            })
+        }
+    }
+
+    const connectWalletHandler = async () => {
+        if (window.ethereum) {
+            window.ethereum.request({ method: 'eth_requestAccounts' })
+                .then(async (result) => {
+                    await accountChangeHandler(result[0]);
+                    defaultAccountChange(result[0]);
+                    setConnectButtonText(`${result[0].slice(0, 4)}...${result[0].slice(-4)}`);
+                })
+        } else {
+            console.log('Error', 'Need to install MetaMask!', 'error')
+        }
+    }
+
+    const accountChangeHandler = async (newAccount) => {
+        checkCorrectNetwork();
+        setDefaultAccount(newAccount);
+    }
+
+    const checkCorrectNetwork = async () => {
+        const { ethereum } = window
+        const chainId = await ethereum.request({ method: 'eth_chainId' })
+        handleDefaultChainChange(chainId)
+    }
+
+    const handleDefaultChainChange = (value) => {
+        console.log("Chain Change to " + value);
+    }
+
     return (
         <header
             data-elementor-type="header" data-elementor-id={365} className="elementor elementor-365 elementor-location-header">
 
             <section className="elementor-section elementor-top-section elementor-element elementor-element-b51501d elementor-section-height-min-height elementor-section-boxed elementor-section-height-default elementor-section-items-middle" data-id="b51501d" data-element_type="section" data-settings="{&quot;background_background&quot;:&quot;classic&quot;}"
-                style={{ backgroundColor: '#FF963C', color: '#A017D7', fontSize: '20px', fontWeight: 'bolder' }}
+                style={{ backgroundColor: '#FF963C', color: '#A017D7', fontSize: '20px', fontWeight: 'bolder', height: '100px', position: 'fixed', width: '100vw' }}
             >
-                <div className="elementor-container elementor-column-gap-default">
+                <div style={{
+                    display: 'flex',
+                    justifyContent: 'space-evenly',
+                    alignItems: 'center',
+                }}>
+                    <div style={{
+                        marginTop: '10px'
+                    }}>
+                        <a href="../index.htm">
+                            <img
+                                src={Logo}
+                                className="attachment-full size-full wp-image-382"
+                                alt=""
+                                style={{
+                                    width: '75px', height: '75px',
+                                    backgroundColor: '#FF963C',
+                                    borderRadius: '100px',
+                                    border: '3px solid white'
+                                }}
+                            />
+                        </a>
+                    </div>
+                    <button
+                        onClick={connectWalletHandler}
+                        style={{
+                            backgroundColor: 'white',
+                            color: 'purple',
+                        }}>
+                        {connectButtonText}
+                    </button>
+                    <button onClick={handleLanguageChange} style={{
+                        backgroundColor: 'white',
+                        color: 'purple'
+                    }}>
+                        🌐
+                        {language}
+                    </button>
+                </div>
+                {/* <div className="elementor-container elementor-column-gap-default">
                     <div className="elementor-column elementor-col-33 elementor-top-column elementor-element elementor-element-8ce7a2a" data-id="8ce7a2a" data-element_type="column" data-settings="{&quot;background_background&quot;:&quot;classic&quot;}">
                         <div className="elementor-widget-wrap elementor-element-populated">
                             <div className="elementor-element elementor-element-7fdcd08 elementor-widget elementor-widget-theme-site-logo elementor-widget-image" data-id="7fdcd08" data-element_type="widget" data-widget_type="theme-site-logo.default">
 
-                                {/* navbar logo section */}
                                 <div className="elementor-widget-container">
                                     <a href="../index.htm">
                                         <img
-                                            width={314}
-                                            height={100}
-                                            src={navbarLogo}
+                                            src={Logo}
                                             className="attachment-full size-full wp-image-382"
                                             alt=""
-                                            sizes="(max-width: 314px) 100vw, 314px"
+                                            style={{
+                                                width: '75px', height: '75px',
+                                                marginTop: '-7px',
+                                                backgroundColor: '#FF963C',
+                                                borderRadius: '100px',
+                                                border: '3px solid white'
+                                            }}
                                         />
                                     </a>
                                 </div>
                             </div>
                         </div>
                     </div>
-                    <nav style={{ position: 'absolute', right: '5vw', top: '3vh' }}>
+                    <nav style={{ position: 'absolute', right: '5vw', top: '7px' }}>
                         <ul id="menu-1-e21e9a5" className="elementor-nav-menu">
                             <li className="menu-item menu-item-type-custom menu-item-object-custom current-menu-item menu-item-355">
                                 <span>
-                                    Connect Wallet
+                                    {
+                                        language === "EN"
+                                            ? text.en
+                                            : text.ch
+                                    }
+                                </span>
+                            </li>
+                            <li>
+                                <span style={{
+                                    color: '#FF963C'
+                                }}>Null</span>
+                            </li>
+                            <li className="menu-item menu-item-type-custom menu-item-object-custom current-menu-item menu-item-355"
+                                onClick={handleLanguageChange}
+                            >
+                                <span>
+                                    Change Language
                                 </span>
                             </li>
                         </ul>
                     </nav>
-                </div>
+                </div> */}
             </section>
         </header>
     )
 }
 
-const Hero = () => {
+const Hero = ({ language }) => {
     return (
         <section className="elementor-section elementor-top-section elementor-element elementor-element-158e9de2 elementor-section-height-min-height elementor-section-boxed elementor-section-height-default elementor-section-items-middle" data-id="158e9de2" data-element_type="section" data-settings="{&quot;background_background&quot;:&quot;classic&quot;,&quot;shape_divider_bottom&quot;:&quot;clouds&quot;}"
             style={{
-                backgroundColor: 'rgb(83,0,117)'
+                backgroundColor: 'rgb(83,0,117)',
+                marginTop: '100px'
             }}>
             <div className="elementor-background-overlay" />
             <div className="elementor-shape elementor-shape-bottom" data-negative="false"
@@ -133,7 +259,9 @@ const Hero = () => {
                                     fontSize: '40px',
                                     fontWeight: 'bolder',
                                 }}>
-                                <h1 className="elementor-heading-title elementor-size-default">About 1020</h1>
+                                <h1 className="elementor-heading-title elementor-size-default">
+                                    1020
+                                </h1>
                             </div>
                         </div>
                         <div className="elementor-element elementor-element-139d546e elementor-widget elementor-widget-text-editor" data-id="139d546e" data-element_type="widget" data-widget_type="text-editor.default">
@@ -150,28 +278,37 @@ const Hero = () => {
     )
 }
 
-const Content1 = () => {
+const Content1 = ({ language }) => {
+
     return (
         <section className="elementor-section elementor-top-section elementor-element elementor-element-33f4dadb elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="33f4dadb" data-element_type="section">
             <div className="elementor-container elementor-column-gap-default" >
-                <div className="elementor-column elementor-col-50 elementor-top-column elementor-element elementor-element-2f0d0f59" data-id="2f0d0f59" data-element_type="column">
-                    <div className="elementor-widget-wrap elementor-element-populated"
+                <div className="elementor-column elementor-col-50 elementor-top-column elementor-element elementor-element-2f0d0f59" data-id="2f0d0f59" data-element_type="column"
+                    style={{
+                        display: 'flex',
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                    }}>
+                    <img src={Logo2} alt="Logo2"
                         style={{
-                            backgroundColor: '#FF963C'
-                        }} >
-                        <img src={navbarLogo} alt="Logo" />
-                    </div>
+                            width: '24vw',
+                            height: '21vw',
+                        }} />
                 </div>
 
                 <div className="elementor-column elementor-col-50 elementor-top-column elementor-element elementor-element-d48ea1e" data-id="d48ea1e" data-element_type="column">
                     <div className="elementor-widget-wrap elementor-element-populated">
                         <div className="elementor-element elementor-element-15c5ff74 elementor-widget elementor-widget-heading" data-id="15c5ff74" data-element_type="widget" data-widget_type="heading.default">
                             <div className="elementor-widget-container">
-                                <h5 style={{
+                                {/* <h5 style={{
                                     color: '#FF963C', fontWeight: 'bold'
                                 }}>
-                                    We are 1020
-                                </h5>
+                                    {
+                                        language === "EN"
+                                            ? "We are"
+                                            : "我們是"
+                                    } 1020
+                                </h5> */}
                             </div>
                         </div>
                         <div className="elementor-element elementor-element-9d8fabf elementor-widget elementor-widget-heading" data-id="9d8fabf" data-element_type="widget" data-widget_type="heading.default">
@@ -179,21 +316,54 @@ const Content1 = () => {
                                 <h1 style={{
                                     color: '#A017D7', fontWeight: 'bolder'
                                 }}>
-                                    Title Title<br />Title Title Title
+                                    DApp
+                                    {
+                                        language === "EN"
+                                            ? " Staking"
+                                            : " 質押"
+                                    }
+
                                 </h1>
                             </div>
                         </div>
-                        <div className="elementor-element elementor-element-2a09bf73 elementor-widget elementor-widget-text-editor" data-id="2a09bf73" data-element_type="widget" data-widget_type="text-editor.default">
+                        <div style={{ display: 'flex', justifyContent: 'center', width: '320px' }}>
                             <div className="elementor-widget-container">
                                 <p style={{
                                     color: 'gray',
+                                    display: 'flex',
+                                    justifyContent: 'center'
                                 }}>
-                                    Content Content Content
+                                    {
+                                        language === "EN"
+                                            ? "The staking Dapp exclusively for 1020 has arrived."
+                                            : "專屬於 1020 的質押 Dapp 來了"
+                                    }
                                 </p>
                                 <p style={{
                                     color: 'gray',
+                                    display: 'flex',
+                                    justifyContent: 'center'
                                 }}>
-                                    Content Content Content
+                                    {
+                                        language === "EN"
+                                            ? "Users can stake within the Dapp."
+                                            : "用戶可於 Dapp 中質押"
+                                    }
+                                    <br />
+
+                                    1.
+                                    {
+                                        language === "EN"
+                                            ? "Earn 1020 from staking JNY."
+                                            : "JNY 獲取 1020 收益"
+                                    }
+                                    <br />
+                                    2.
+                                    {
+                                        language === "EN"
+                                            ? "Earn Point from staking 1020 LP."
+                                            : "1020LP 獲取 積分獎勵"
+                                    }
                                 </p>
                             </div>
                         </div>
@@ -236,7 +406,11 @@ const Content1 = () => {
                                 <span style={{
                                     fontWeight: 'bold'
                                 }}>
-                                    User Staked
+                                    {
+                                        language === "EN"
+                                            ? "User Staked"
+                                            : "質押用戶"
+                                    }
                                 </span>
                             </div>
                             <div className='box' style={{
@@ -253,25 +427,20 @@ const Content1 = () => {
                                 alignItems: 'center',
                                 margin: '20px'
                             }}>
-                                <span style={{
-                                    color: 'rgb(83,0,117)',
-                                    display: 'flex',
-                                    flexDirection: 'row',
-                                    fontSize: '20px',
-                                    fontWeight: 'bolder',
-                                }}>
-                                    <span>
-                                        <NumberCounter targetNumber={100} />
-                                    </span>
-                                    <span>
-                                        +
-                                    </span>
-                                </span>
-                                <span style={{
-                                    fontWeight: 'bold'
-                                }}>
-                                    User Staked
-                                </span>
+                                <a
+                                    href="#Staking"
+                                    style={{
+                                        fontWeight: 'bolder',
+                                        color: 'rgb(83,0,117)'
+                                    }}>
+                                    ⭐
+                                    {
+                                        language === "EN"
+                                            ? "Start Staking"
+                                            : "前往質押"
+                                    }
+                                    ⭐
+                                </a>
                             </div>
                         </div>
                     </div>
@@ -281,223 +450,338 @@ const Content1 = () => {
     )
 }
 
-const About = () => {
+const Content2 = ({ language }) => {
+    const CA = "";
+    const link = `https://pancakeswap.finance/swap?outputCurrency=${CA}`
+
+    const LeftColumn = [
+        'Total Supply : 10200',
+        'Max Wallet : 20',
+        'Anti Bot',
+    ]
     return (
-        <div style={{ backgroundColor: '#FDF8FF' }}>
-            <Navbar />
+        <section className="elementor-section elementor-top-section elementor-element-1cd26e9 elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="1cd26e9" data-element_type="section">
+            <div className="elementor-container elementor-column-gap-default" style={{
+                display: 'flex', flexDirection: 'column'
+            }}>
+                <div className="elementor-element elementor-element-33e5fbe2 elementor-widget elementor-widget-heading" data-id="33e5fbe2" data-element_type="widget" data-widget_type="heading.default"
+                    style={{
+                        display: 'flex', flexWrap: 'wrap', justifyContent: 'center',
+                    }}>
+                    <h3 style={{
+                        color: '#A017D7', fontWeight: 'bolder',
+                        wordBreak: 'break-all',
+                        padding: '20px',
+                    }}>
+                        1020
+                        {
+                            language === "EN"
+                                ? " CA : "
+                                : " 合約 : "
+                        }
+                        <br />
+                        <p style={{
+                            paddingLeft: '20px',
+                            color: 'gray'
+                        }}>
+                            <br />
+                            123145364165456465464654654545646464684
+                        </p>
+                    </h3>
 
-            <div data-elementor-type="wp-page" data-elementor-id={177} className="elementor elementor-177">
-                <Hero />
-                <Content1 />
-                <section className="elementor-section elementor-top-section elementor-element elementor-element-1cd26e9 elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="1cd26e9" data-element_type="section">
-                    <div className="elementor-container elementor-column-gap-default">
-                        <div className="elementor-column elementor-col-50 elementor-top-column elementor-element elementor-element-5d9ad543" data-id="5d9ad543" data-element_type="column">
-                            <div className="elementor-widget-wrap elementor-element-populated">
-                                <div className="elementor-element elementor-element-33e5fbe2 elementor-widget elementor-widget-heading" data-id="33e5fbe2" data-element_type="widget" data-widget_type="heading.default">
-                                    <div className="elementor-widget-container">
-                                        <h6 className="elementor-heading-title elementor-size-default">We do sell NFT</h6>
-                                    </div>
-                                </div>
-                                <div className="elementor-element elementor-element-450ed55f elementor-widget elementor-widget-heading" data-id="450ed55f" data-element_type="widget" data-widget_type="heading.default">
-                                    <div className="elementor-widget-container">
-                                        <h2 className="elementor-heading-title elementor-size-default">Yes we sell limited digital
-                                            Art on Market</h2>
-                                    </div>
-                                </div>
-                                <div className="elementor-element elementor-element-2c1d6282 elementor-widget elementor-widget-text-editor" data-id="2c1d6282" data-element_type="widget" data-widget_type="text-editor.default">
-                                    <div className="elementor-widget-container">
-                                        <p>Donec consectetur ullamcorper libero eu vestibulum. Pellentesque pulvinar justo sem,
-                                            vitae tincidunt nisl bibendum eu. Nam maximus justo et ante gravida, sed ultricies
-                                            est scelerisque. Integer eget odio metus. Nam lobortis magna eros, sed dictum nibh
-                                            imperdiet eu.&nbsp;</p>
+                    <a
+                        href={link}
+                        style={{
+                            fontWeight: 'bolder',
+                            color: 'rgb(83,0,117)'
+                        }}>
+
+                        <button className='box' style={{
+                            backgroundColor: 'transparent',
+                            width: '15vw',
+                            height: '10vh',
+                            minWidth: '280px',
+                            minHeight: '50px',
+                            borderRadius: '20px',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            justifyContent: 'center',
+                            alignItems: 'center',
+                            margin: '20px'
+                        }}>
+                            Buy On PancakeSwap
+                        </button>
+                    </a>
+                </div>
+                {/* <div style={{ display: 'flex', flexWrap: 'wrap' }}>
+                    <div className="elementor-column elementor-col-50 elementor-top-column elementor-element elementor-element-5d9ad543" data-id="5d9ad543" data-element_type="column"
+                        style={{
+                            display: 'flex', paddingLeft: '20px'
+                        }}>
+                        <div>
+                            <div style={{ padding: '10px' }}>
+                                <div className="elementor-widget-container"
+                                >
+                                    <h4 style={{
+                                        color: '#A017D7', fontWeight: 'bolder'
+                                    }}>
+                                        代幣機制</h4>
+                                    <div style={{
+                                        paddingLeft: '20px'
+                                    }}>
+                                        <span style={{
+                                            color: 'gray',
+                                        }}>
+                                            買入稅率 : 5% <br />
+                                            賣出稅率 : 5% <br />
+                                            稅率分配 :
+                                            <ul>
+                                                <li>LP分紅 2%</li>
+                                                <li>營銷 2% </li>
+                                                <li>1% 銷毀 直到 總量縮減為 1020</li>
+                                            </ul>
+                                        </span>
                                     </div>
                                 </div>
                             </div>
                         </div>
-                        <div className="elementor-column elementor-col-50 elementor-top-column elementor-element elementor-element-677e4dc animated-slow elementor-invisible" data-id="677e4dc" data-element_type="column" data-settings="{&quot;animation&quot;:&quot;fadeInRight&quot;,&quot;animation_delay&quot;:200}">
-                            <div className="elementor-widget-wrap elementor-element-populated">
-                                <div className="elementor-element elementor-element-154ca562 elementor-widget elementor-widget-heading" data-id="154ca562" data-element_type="widget" data-widget_type="heading.default">
-                                    <div className="elementor-widget-container">
-                                        <h4 className="elementor-heading-title elementor-size-default">Where is it ?</h4>
-                                    </div>
-                                </div>
-                                <div className="elementor-element elementor-element-76955719 elementor-widget elementor-widget-text-editor" data-id={76955719} data-element_type="widget" data-widget_type="text-editor.default">
-                                    <div className="elementor-widget-container">
-                                        <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut elit tellus, luctus nec
-                                            ullamcorper mattis, pulvinar dapibus leo.</p>
-                                    </div>
-                                </div>
-                                <section className="elementor-section elementor-inner-section elementor-element elementor-element-4e5e4e51 elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="4e5e4e51" data-element_type="section">
-                                    <div className="elementor-container elementor-column-gap-no">
-                                        <div className="elementor-column elementor-col-50 elementor-inner-column elementor-element elementor-element-6db645ae" data-id="6db645ae" data-element_type="column">
-                                            <div className="elementor-widget-wrap elementor-element-populated">
-                                                <div className="elementor-element elementor-element-5dea4c5b elementor-icon-list--layout-traditional elementor-list-item-link-full_width elementor-widget elementor-widget-icon-list" data-id="5dea4c5b" data-element_type="widget" data-widget_type="icon-list.default">
-                                                    <div className="elementor-widget-container">
-                                                        <ul className="elementor-icon-list-items">
-                                                            <li className="elementor-icon-list-item">
-                                                                <span className="elementor-icon-list-icon">
-                                                                    <i aria-hidden="true" className="fas fa-circle" /> </span>
-                                                                <span className="elementor-icon-list-text">OpenSea</span>
-                                                            </li>
-                                                            <li className="elementor-icon-list-item">
-                                                                <span className="elementor-icon-list-icon">
-                                                                    <i aria-hidden="true" className="fas fa-circle" /> </span>
-                                                                <span className="elementor-icon-list-text">Rarible</span>
-                                                            </li>
-                                                            <li className="elementor-icon-list-item">
-                                                                <span className="elementor-icon-list-icon">
-                                                                    <i aria-hidden="true" className="fas fa-circle" /> </span>
-                                                                <span className="elementor-icon-list-text">Super rare</span>
-                                                            </li>
+                    </div>
+                    <div className="elementor-column elementor-col-50 elementor-top-column"
+                        style={{
+                            display: 'flex', paddingLeft: '20px'
+                        }}>
+                        <div>
+                            <div style={{ padding: '10px' }}>
+                                <div className="elementor-widget-container"
+                                >
+                                    <h4 style={{
+                                        color: '#A017D7', fontWeight: 'bolder'
+                                    }}>
+                                        Token Parameter</h4>
+                                    <div className="elementor-container elementor-column-gap-no"
+                                        style={{
+                                            display: 'flex', flexDirection: 'column'
+                                        }}>
+                                        <div>
+                                            <div>
+                                                <div>
+                                                    <div style={{
+                                                        paddingLeft: '20px'
+                                                    }}>
+                                                        <ul className="elementor-icon-list-items" style={{
+                                                            listStyle: 'none',
+                                                        }}>
+                                                            {
+                                                                LeftColumn.map((content, index) => {
+                                                                    return (
+                                                                        <li className="elementor-icon-list-item" key={content}>
+                                                                            <span className="elementor-icon-list-icon" style={{ color: 'orange' }}>
+                                                                                <i aria-hidden="true" className="fas fa-circle" />
+                                                                            </span>
+                                                                            <span className="elementor-icon-list-text" style={{
+                                                                                color: 'gray', fontWeight: 'bolder',
+                                                                                padding: '10px',
+                                                                            }}>{content}</span>
+                                                                        </li>
+                                                                    )
+                                                                })
+                                                            }
                                                         </ul>
                                                     </div>
                                                 </div>
                                             </div>
                                         </div>
-                                        <div className="elementor-column elementor-col-50 elementor-inner-column elementor-element elementor-element-6787c980" data-id="6787c980" data-element_type="column">
-                                            <div className="elementor-widget-wrap elementor-element-populated">
-                                                <div className="elementor-element elementor-element-7c576ad1 elementor-icon-list--layout-traditional elementor-list-item-link-full_width elementor-widget elementor-widget-icon-list" data-id="7c576ad1" data-element_type="widget" data-widget_type="icon-list.default">
-                                                    <div className="elementor-widget-container">
-                                                        <ul className="elementor-icon-list-items">
-                                                            <li className="elementor-icon-list-item">
-                                                                <span className="elementor-icon-list-icon">
-                                                                    <i aria-hidden="true" className="fas fa-circle" /> </span>
-                                                                <span className="elementor-icon-list-text">Nifty Gateway</span>
-                                                            </li>
-                                                            <li className="elementor-icon-list-item">
-                                                                <span className="elementor-icon-list-icon">
-                                                                    <i aria-hidden="true" className="fas fa-circle" /> </span>
-                                                                <span className="elementor-icon-list-text">Foundation</span>
-                                                            </li>
-                                                            <li className="elementor-icon-list-item">
-                                                                <span className="elementor-icon-list-icon">
-                                                                    <i aria-hidden="true" className="fas fa-circle" /> </span>
-                                                                <span className="elementor-icon-list-text">Sorare</span>
-                                                            </li>
-                                                        </ul>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </section>
-                            </div>
-                        </div>
-                    </div>
-                </section>
-                <section className="elementor-section elementor-top-section elementor-element elementor-element-1cd26e9 elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="1cd26e9" data-element_type="section" id="stakingtable">
-                    <div className="elementor-container elementor-column-gap-default">
-                        <div className="elementor-column elementor-col-50 elementor-top-column elementor-element elementor-element-5d9ad543" data-id="5d9ad543" data-element_type="column">
-                            <div className="elementor-widget-wrap elementor-element-populated">
-                                <div className="elementor-element elementor-element-33e5fbe2 elementor-widget elementor-widget-heading" data-id="33e5fbe2" data-element_type="widget" data-widget_type="heading.default">
-                                    <div className="elementor-widget-container">
-                                        <h6 className="elementor-heading-title elementor-size-default">Start Staking</h6>
-                                    </div>
-                                </div>
-                                <div className="elementor-element elementor-element-450ed55f elementor-widget elementor-widget-heading" data-id="450ed55f" data-element_type="widget" data-widget_type="heading.default">
-                                    <div className="elementor-widget-container">
-                                        <h2 className="elementor-heading-title elementor-size-default">
-                                            Staking Status
-                                        </h2>
-                                    </div>
-                                </div>
-                                <div className="elementor-element elementor-element-2c1d6282 elementor-widget elementor-widget-text-editor" data-id="2c1d6282" data-element_type="widget" data-widget_type="text-editor.default">
-                                    <div className="elementor-widget-container">
-                                        <p>
-                                            Data
-                                            Data
-                                        </p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div className="elementor-column elementor-col-50 elementor-top-column elementor-element elementor-element-677e4dc animated-slow elementor-invisible" data-id="677e4dc" data-element_type="column" data-settings="{&quot;animation&quot;:&quot;fadeInRight&quot;,&quot;animation_delay&quot;:200}">
-                            <div className="elementor-widget-wrap elementor-element-populated">
-                                <div className="elementor-element elementor-element-154ca562 elementor-widget elementor-widget-heading" data-id="154ca562" data-element_type="widget" data-widget_type="heading.default">
-                                    <div className="elementor-widget-container">
-                                        <h4 className="elementor-heading-title elementor-size-default">
-                                            Table Title
-                                        </h4>
-                                    </div>
-                                </div>
-                                <div className="elementor-element elementor-element-76955719 elementor-widget elementor-widget-text-editor" data-id={76955719} data-element_type="widget" data-widget_type="text-editor.default">
-                                    <div className="elementor-widget-container">
-                                        <table>
-                                            <tbody><tr>
-                                                <td>
-                                                </td>
-                                            </tr>
-                                                <tr>
-                                                    <td>
-                                                    </td>
-                                                </tr>
-                                            </tbody></table>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
-                </section>
-                <section className="elementor-section elementor-top-section elementor-element elementor-element-5c5d2bcd elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="5c5d2bcd" data-element_type="section" data-settings="{&quot;background_background&quot;:&quot;classic&quot;}">
-                    <div className="elementor-container elementor-column-gap-default">
-                        <div className="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-6e73cbbc" data-id="6e73cbbc" data-element_type="column" data-settings="{&quot;background_background&quot;:&quot;classic&quot;}">
-                            <div className="elementor-widget-wrap elementor-element-populated">
-                                <div className="elementor-background-overlay" />
-                                <section className="elementor-section elementor-inner-section elementor-element elementor-element-69dd5243 elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="69dd5243" data-element_type="section">
-                                    <div className="elementor-container elementor-column-gap-default">
-                                        <div className="elementor-column elementor-col-50 elementor-inner-column elementor-element elementor-element-1d989e4d" data-id="1d989e4d" data-element_type="column">
-                                            <div className="elementor-widget-wrap elementor-element-populated">
-                                                <div className="elementor-element elementor-element-6d15b888 animated-slow elementor-invisible elementor-widget elementor-widget-image" data-id="6d15b888" data-element_type="widget" data-settings="{&quot;_animation&quot;:&quot;fadeInLeft&quot;,&quot;_animation_delay&quot;:200}" data-widget_type="image.default">
-                                                    <div className="elementor-widget-container">
-                                                        <img decoding="async" width={655} height={861} src="../wp-content/uploads/sites/40/2022/01/Happyman.png" className="attachment-full size-full wp-image-117" alt="" srcSet="../wp-content/uploads/sites/40/2022/01/Happyman.png 655w, ../wp-content/uploads/sites/40/2022/01/Happyman-228x300.png 228w" sizes="(max-width: 655px) 100vw, 655px" />
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div className="elementor-column elementor-col-50 elementor-inner-column elementor-element elementor-element-5a93792d" data-id="5a93792d" data-element_type="column">
-                                            <div className="elementor-widget-wrap elementor-element-populated">
-                                                <div className="elementor-element elementor-element-5404e244 elementor-widget elementor-widget-heading" data-id="5404e244" data-element_type="widget" data-widget_type="heading.default">
-                                                    <div className="elementor-widget-container">
-                                                        <h2 className="elementor-heading-title elementor-size-default">Lets
-                                                            start<br /> your project with us </h2>
-                                                    </div>
-                                                </div>
-                                                <div className="elementor-element elementor-element-6e7bd032 elementor-widget elementor-widget-heading" data-id="6e7bd032" data-element_type="widget" data-widget_type="heading.default">
-                                                    <div className="elementor-widget-container">
-                                                        <h6 className="elementor-heading-title elementor-size-default">and get
-                                                            special offer</h6>
-                                                    </div>
-                                                </div>
-                                                <div className="elementor-element elementor-element-5c6e055c elementor-widget elementor-widget-text-editor" data-id="5c6e055c" data-element_type="widget" data-widget_type="text-editor.default">
-                                                    <div className="elementor-widget-container">
-                                                        <p>Pellentesque pulvinar justo sem, vitae tincidunt nisl bibendum eu.
-                                                            Nam maximus justo et ante gravida.</p>
-                                                    </div>
-                                                </div>
-                                                <div className="elementor-element elementor-element-468c1984 elementor-widget__width-auto elementor-widget elementor-widget-button" data-id="468c1984" data-element_type="widget" data-widget_type="button.default">
-                                                    <div className="elementor-widget-container">
-                                                        <div className="elementor-button-wrapper">
-                                                            <a className="elementor-button elementor-button-link elementor-size-sm elementor-animation-grow" href="#stakingtable">
-                                                                <span className="elementor-button-content-wrapper">
-                                                                    <span className="elementor-button-text">Read More</span>
-                                                                </span>
-                                                            </a>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </section>
-                            </div>
-                        </div>
-                    </div>
-                </section>
+                </div> */}
             </div>
+        </section>
+    )
+}
 
-            <Footer />
+const StakingCard = ({
+    fatherTokenName, sonTokenName, language
+}) => {
+    const placeHolderText = language === "EN" ? "Amount to Stake" : "質押數量";
+
+    return (
+        <div style={{
+            padding: '20px', minWidth: '360px', width: '45vw',
+            margin: '10px',
+            color: 'purple',
+            backgroundColor: 'white',
+            borderRadius: '20px'
+        }}>
+            <div>
+                <h4 style={{ textAlign: 'center' }}>
+
+                    {
+                        language === "EN"
+                            ? " Stake "
+                            : " 質押 "
+                    }
+                    {fatherTokenName}
+
+                    {
+                        language === "EN"
+                            ? " to Earn "
+                            : " 賺取 "
+                    } {sonTokenName}
+                </h4>
+                <TableComponent
+                    fatherTokenName={fatherTokenName}
+                    sonTokenName={sonTokenName}
+                />
+                <div style={{
+                    display: 'flex',
+                    justifyContent: 'center',
+                    alignItems: 'center'
+                }}>
+                    <button>
+                        {
+                            language === "EN"
+                                ? " Stake"
+                                : " 質押"
+                        }
+                    </button>
+                    <input
+                        placeholder={placeHolderText}
+                        style={{
+                            marginLeft: '20px',
+                            marginRight: '20px',
+                            width: '100px'
+                        }}
+                    />
+                    {fatherTokenName}
+                </div>
+            </div>
+        </div>
+    )
+}
+
+const TableComponent = ({
+    fatherTokenName,
+    sonTokenName,
+}) => {
+    return (
+        <div>
+            <table style={{ border: '1px solid black', width: '100%' }}>
+                <thead>
+                    <tr>
+                        <th style={{ border: '1px solid black', padding: '8px' }}>持倉 {fatherTokenName}</th>
+                        <th style={{ border: '1px solid black', padding: '8px' }}>質押 {fatherTokenName}</th>
+                        <th style={{ border: '1px solid black', padding: '8px' }}>{sonTokenName} 收益</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td style={{ border: '1px solid black', padding: '8px' }}>Data 1</td>
+                        <td style={{ border: '1px solid black', padding: '8px' }}>Data 2</td>
+                        <td style={{ border: '1px solid black', padding: '8px' }}>Data 3</td>
+                    </tr>
+                    {/* <tr>
+                        <td style={{ border: '1px solid black', padding: '8px' }}>Data 4</td>
+                        <td style={{ border: '1px solid black', padding: '8px' }}>Data 5</td>
+                        <td style={{ border: '1px solid black', padding: '8px' }}>Data 6</td>
+                    </tr> */}
+                    {/* Add more rows as needed */}
+                </tbody>
+            </table>
         </div>
     );
+}
+
+const Marquee = ({ content, speed }) => {
+    const [offset, setOffset] = useState(0);
+
+    const containerStyle = {
+        color: 'purple',
+        backgroundColor: '#FF963C',
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        height: '50px',
+    }
+
+    const marqueeStyle = {
+        transform: `translateX(-${offset}px)`,
+        whiteSpace: 'nowrap',
+        display: 'flex',
+        animation: `marquee-animation ${speed}s linear infinite`,
+        fontSize: '20px',
+        fontWeight: 'bolder'
+    };
+
+    return (
+        <div className="marquee-container" style={containerStyle}>
+            <div className="marquee" style={marqueeStyle}>
+                <div className="marquee-content">{content}</div>
+                <div className="marquee-content">{content}</div>
+                <div className="marquee-content">{content}</div>
+            </div>
+        </div>
+    );
+};
+
+const Staking = ({ defaultAccount, language }) => {
+
+    const [provider, setProvider] = useState(null);
+    const [signer, setSigner] = useState(null);
+    const [contract, setContract] = useState(null);
+
+    const StakingCA = "";
+    const updateEthers = async () => {
+        try {
+            const tempProvider = new ethers.providers.Web3Provider(window.ethereum);
+            setProvider(tempProvider);
+
+            const tempSigner = tempProvider.getSigner();
+            setSigner(tempSigner);
+
+            const tempContract = new ethers.Contract(StakingCA, StakingABI, tempSigner)
+            setContract(tempContract);
+
+            // const tempUsdtContract = new ethers.Contract(USDTContractAddress, usdtabi, tempSigner)
+            // setUsdtContract(tempUsdtContract);
+
+        } catch (err) {
+            console.log(err)
+        }
+    }
+
+    useEffect(() => {
+        if (defaultAccount === null) return;
+        updateEthers();
+    }, [defaultAccount])
+
+
+    console.log("In Staking " + defaultAccount)
+    return (
+        <section id="Staking"
+            style={{
+                minHeight: '50vh',
+                display: 'flex',
+                flexDirection: 'row',
+                flexWrap: 'wrap',
+                backgroundColor: 'purple',
+                justifyContent: 'space-evenly',
+                padding: '20px',
+            }}>
+            <StakingCard
+                fatherTokenName={"JNY"}
+                sonTokenName={"1020"}
+                language={language}
+            />
+            <StakingCard
+                fatherTokenName={"1020LP"}
+                sonTokenName={"Point"}
+                language={language}
+            />
+        </section>
+    )
 }
 
 const Footer = () => {
@@ -509,6 +793,37 @@ const Footer = () => {
             </section>
         </footer>
     )
+}
+
+const About = () => {
+    const [language, setLanguage] = useState("EN")
+    const [defaultAccount, setDefaultAccount] = useState(null);
+    const languageHandler = (value) => {
+        setLanguage(value)
+    }
+    const handleDefaultAccountChange = (value) => {
+        setDefaultAccount(value);
+        console.log(value)
+    }
+    return (
+        <div style={{ backgroundColor: '#FDF8FF' }}>
+            <Navbar setLan={languageHandler} defaultAccountChange={handleDefaultAccountChange} />
+
+            <div data-elementor-type="wp-page" data-elementor-id={177} className="elementor elementor-177">
+                <Hero language={language} />
+                <Content1 language={language} />
+                <Content2 />
+
+                <Marquee
+                    content={"Staking Center"}
+                    speed={10}
+                />
+                <Staking defaultAccount={defaultAccount} language={language} />
+            </div>
+
+            <Footer />
+        </div>
+    );
 }
 
 export default About;

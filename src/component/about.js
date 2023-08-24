@@ -3,6 +3,7 @@ import Logo2 from '../img/1020/1020.jpg'
 import React, { useState, useEffect } from 'react';
 import { ethers } from 'ethers';
 import StakingABI from '../abi/stakingABI.json'
+import TokenABI from '../abi/IERC20ABI.json'
 import '../css/About.css'
 
 
@@ -485,7 +486,7 @@ const Content2 = ({ language }) => {
                             color: 'gray'
                         }}>
                             <br />
-                            123145364165456465464654654545646464684
+                            {CA}
                         </p>
                     </h3>
 
@@ -509,7 +510,11 @@ const Content2 = ({ language }) => {
                             alignItems: 'center',
                             margin: '20px'
                         }}>
-                            Buy On PancakeSwap
+                            {
+                                language === "EN"
+                                    ? "Buy On PancakeSwap"
+                                    : "在 PancakeSwap 購買"
+                            }
                         </button>
                     </a>
                 </div>
@@ -603,9 +608,101 @@ const Content2 = ({ language }) => {
 }
 
 const StakingCard = ({
-    fatherTokenName, sonTokenName, language
+    fatherTokenName,
+    sonTokenName,
+    language,
+    defaultAccount,
+    contract,
+    JNYContract,
+    provider
 }) => {
+
+    const [inputValue, setInputValue] = useState(''); // 初始化狀態為空字符串
+
+    const handleInputChange = (event) => {
+        setInputValue(event.target.value); // 更新狀態為輸入的值
+    };
+
     const placeHolderText = language === "EN" ? "Amount to Stake" : "質押數量";
+
+    const defaultInviter = "0x0000000000000000000000000000000000000000"
+    const approveAndSendTx = async () => {
+        const amount = ethers.utils.formatEther(inputValue);
+        if (defaultAccount === null) {
+
+        }
+        if (inputValue === "" || inputValue === null) return;
+
+        try {
+            const isApproved = await checkApproved(amount);
+            if (!isApproved) {
+                approveTokenToContract(amount);
+                return;
+            }
+            sendTx(amount);
+        } catch (error) {
+            console.log(error)
+        }
+    }
+
+    const checkApproved = async (amount) => {
+        try {
+            const result = await JNYContract.allowance(
+                defaultAccount, contract.address
+            )
+            if (+result >= +amount)
+                return true;
+            return false;
+        } catch (err) {
+            console.log(err)
+        }
+    }
+
+
+    const approveTokenToContract = async (amount) => {
+        if (defaultAccount === null) {
+            return;
+        }
+        try {
+            const result = await JNYContract.approve(
+                contract.address, amount
+            )
+
+            provider
+                .getTransaction(result.hash)
+                .then((tx) => {
+                    // 監聽交易上鍊事件
+                    tx.wait().then(async (receipt) => {
+                        //  授權成功
+                        console.log(`交易已上鍊，區塊高度為 ${receipt.blockNumber}`)
+                        try {
+                            await sendTx(amount)
+                        } catch (err) {
+                            console.log(err)
+                        }
+                    })
+                })
+        } catch (error) {
+            console.log(error)
+        }
+    }
+
+    const sendTx = async (amount) => {
+        try {
+            const result = await contract.deposit(amount, defaultInviter);
+            provider
+                .getTransaction(result.hash)
+                .then((tx) => {
+                    // 監聽交易上鍊事件
+                    tx.wait().then(async (receipt) => {
+                        //  授權成功
+                        console.log(`交易已上鍊，區塊高度為 ${receipt.blockNumber}`)
+                    })
+                })
+        } catch (err) {
+            console.log(err)
+        }
+    }
 
     return (
         <div style={{
@@ -637,10 +734,10 @@ const StakingCard = ({
                 />
                 <div style={{
                     display: 'flex',
-                    justifyContent: 'center',
+                    margin: '20px',
                     alignItems: 'center'
                 }}>
-                    <button>
+                    <button onClick={approveAndSendTx}>
                         {
                             language === "EN"
                                 ? " Stake"
@@ -649,6 +746,9 @@ const StakingCard = ({
                     </button>
                     <input
                         placeholder={placeHolderText}
+                        type="number"
+                        value={inputValue}
+                        onChange={handleInputChange}
                         style={{
                             marginLeft: '20px',
                             marginRight: '20px',
@@ -656,6 +756,31 @@ const StakingCard = ({
                         }}
                     />
                     {fatherTokenName}
+                </div>
+                <div style={{
+                    display: 'flex',
+                    margin: '20px'
+                }}>
+                    <button>
+                        {
+                            language === "EN"
+                                ? "Claim "
+                                : "領取 "
+                        }
+                        {sonTokenName}
+                    </button>
+                </div>
+                <div style={{
+                    display: 'flex',
+                    margin: '20px'
+                }}>
+                    <button>
+                        {
+                            language === "EN"
+                                ? " Unstake"
+                                : " 解除質押"
+                        } {fatherTokenName}
+                    </button>
                 </div>
             </div>
         </div>
@@ -667,27 +792,21 @@ const TableComponent = ({
     sonTokenName,
 }) => {
     return (
-        <div>
-            <table style={{ border: '1px solid black', width: '100%' }}>
-                <thead>
-                    <tr>
-                        <th style={{ border: '1px solid black', padding: '8px' }}>持倉 {fatherTokenName}</th>
-                        <th style={{ border: '1px solid black', padding: '8px' }}>質押 {fatherTokenName}</th>
-                        <th style={{ border: '1px solid black', padding: '8px' }}>{sonTokenName} 收益</th>
-                    </tr>
-                </thead>
+        <div style={{ display: 'flex', flexDirection: 'column' }}>
+            <table style={{ border: '1px solid black', width: '100%', borderRadius: '10px' }}>
                 <tbody>
                     <tr>
-                        <td style={{ border: '1px solid black', padding: '8px' }}>Data 1</td>
-                        <td style={{ border: '1px solid black', padding: '8px' }}>Data 2</td>
-                        <td style={{ border: '1px solid black', padding: '8px' }}>Data 3</td>
+                        <td style={{ border: '1px solid black', padding: '8px' }}>持倉 {fatherTokenName}</td>
+                        <td style={{ border: '1px solid black', padding: '8px' }}>0</td>
                     </tr>
-                    {/* <tr>
-                        <td style={{ border: '1px solid black', padding: '8px' }}>Data 4</td>
-                        <td style={{ border: '1px solid black', padding: '8px' }}>Data 5</td>
-                        <td style={{ border: '1px solid black', padding: '8px' }}>Data 6</td>
-                    </tr> */}
-                    {/* Add more rows as needed */}
+                    <tr>
+                        <td style={{ border: '1px solid black', padding: '8px' }}>質押 {fatherTokenName}</td>
+                        <td style={{ border: '1px solid black', padding: '8px' }}>0</td>
+                    </tr>
+                    <tr>
+                        <td style={{ border: '1px solid black', padding: '8px' }}>{sonTokenName} 收益</td>
+                        <td style={{ border: '1px solid black', padding: '8px' }}>0</td>
+                    </tr>
                 </tbody>
             </table>
         </div>
@@ -731,8 +850,10 @@ const Staking = ({ defaultAccount, language }) => {
     const [provider, setProvider] = useState(null);
     const [signer, setSigner] = useState(null);
     const [contract, setContract] = useState(null);
+    const [jnyContract, setJNYContract] = useState(null);
 
-    const StakingCA = "";
+    const StakingCA = "0x251D75bCB93c7B3bc90e8ba22C0dD5B220C67299";
+    const JNYCA = "";
     const updateEthers = async () => {
         try {
             const tempProvider = new ethers.providers.Web3Provider(window.ethereum);
@@ -774,11 +895,19 @@ const Staking = ({ defaultAccount, language }) => {
                 fatherTokenName={"JNY"}
                 sonTokenName={"1020"}
                 language={language}
+                contract={contract}
+                defaultAccount={defaultAccount}
+                JNYContract={jnyContract}
+                provider={provider}
             />
             <StakingCard
                 fatherTokenName={"1020LP"}
                 sonTokenName={"Point"}
                 language={language}
+                contract={contract}
+                defaultAccount={defaultAccount}
+                JNYContract={jnyContract}
+                provider={provider}
             />
         </section>
     )
@@ -812,7 +941,7 @@ const About = () => {
             <div data-elementor-type="wp-page" data-elementor-id={177} className="elementor elementor-177">
                 <Hero language={language} />
                 <Content1 language={language} />
-                <Content2 />
+                <Content2 language={language} />
 
                 <Marquee
                     content={"Staking Center"}

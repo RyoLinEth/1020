@@ -1552,6 +1552,7 @@ const Staking = ({
                 Phase={2}
                 startBlock={lpContractStartBlock}
                 bonusEndBlock={lpContractEndBlock}
+                hasBeenClaimdReward={pointHasBeenClaimedReward}
             />
         </section>
     )

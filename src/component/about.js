@@ -403,7 +403,7 @@ const Content1 = ({ language }) => {
                                     fontWeight: 'bolder',
                                 }}>
                                     <span>
-                                        <NumberCounter targetNumber={327} />
+                                        <NumberCounter targetNumber={99} />
                                     </span>
                                     <span>
                                         +
@@ -1126,6 +1126,7 @@ const TableComponent = ({
     hasBeenClaimdReward
 }) => {
     const BlockchainTimestampConverter = ({ timestamp }) => {
+        if (timestamp===null) return;
         // 將區塊鍊的時間戳轉換為正式的時間
         const formattedTime = new Date(timestamp * 1000).toLocaleString();
         return (<span>{formattedTime}</span>)

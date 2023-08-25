@@ -166,7 +166,8 @@ const Navbar = ({ setLan, defaultAccountChange }) => {
                         style={{
                             backgroundColor: 'white',
                             color: 'purple',
-                        }}>
+                        }}
+                    >
                         {connectButtonText}
                     </button>
                     <button onClick={handleLanguageChange} style={{
@@ -414,35 +415,32 @@ const Content1 = ({ language }) => {
                                     }
                                 </span>
                             </div>
-                            <div className='box' style={{
-                                backgroundColor: 'orange',
-                                color: 'white',
-                                width: '15vw',
-                                height: '10vh',
-                                minWidth: '280px',
-                                minHeight: '50px',
-                                borderRadius: '20px',
-                                display: 'flex',
-                                flexDirection: 'column',
-                                justifyContent: 'center',
-                                alignItems: 'center',
-                                margin: '20px'
-                            }}>
-                                <a
-                                    href="#Staking"
-                                    style={{
-                                        fontWeight: 'bolder',
-                                        color: 'rgb(83,0,117)'
-                                    }}>
-                                    ⭐
-                                    {
-                                        language === "EN"
-                                            ? "Start Staking"
-                                            : "前往質押"
-                                    }
-                                    ⭐
-                                </a>
-                            </div>
+                            <a
+                                href="#Staking"
+                                style={{
+                                    fontWeight: 'bolder',
+                                    color: 'rgb(83,0,117)',
+                                    backgroundColor: 'orange',
+                                    color: 'white',
+                                    width: '15vw',
+                                    height: '10vh',
+                                    minWidth: '280px',
+                                    minHeight: '50px',
+                                    borderRadius: '20px',
+                                    display: 'flex',
+                                    flexDirection: 'column',
+                                    justifyContent: 'center',
+                                    alignItems: 'center',
+                                    margin: '20px'
+                                }}>
+                                ⭐
+                                {
+                                    language === "EN"
+                                        ? "Start Staking"
+                                        : "前往質押"
+                                }
+                                ⭐
+                            </a>
                         </div>
                     </div>
                 </div>
@@ -498,7 +496,6 @@ const Content2 = ({ language }) => {
                         }}>
 
                         <button className='box' style={{
-                            backgroundColor: 'transparent',
                             width: '15vw',
                             height: '10vh',
                             minWidth: '280px',
@@ -508,12 +505,12 @@ const Content2 = ({ language }) => {
                             flexDirection: 'column',
                             justifyContent: 'center',
                             alignItems: 'center',
-                            margin: '20px'
+                            margin: '20px',
                         }}>
                             {
                                 language === "EN"
-                                    ? "Buy On PancakeSwap"
-                                    : "在 PancakeSwap 購買"
+                                    ? "Buy 1020 On PancakeSwap"
+                                    : "在 PancakeSwap 購買 1020"
                             }
                         </button>
                     </a>
@@ -613,7 +610,11 @@ const StakingCard = ({
     language,
     defaultAccount,
     contract,
-    JNYContract,
+    fatherContract,
+    fatherDecimals,
+    fatherBalance,
+    fatherStaked,
+    sonGained,
     provider
 }) => {
 
@@ -626,13 +627,46 @@ const StakingCard = ({
     const placeHolderText = language === "EN" ? "Amount to Stake" : "質押數量";
 
     const defaultInviter = "0x0000000000000000000000000000000000000000"
-    const approveAndSendTx = async () => {
-        const amount = ethers.utils.formatEther(inputValue);
-        if (defaultAccount === null) {
 
+    const handleWithdraw = async () => {
+        const realFatherStaked = ethers.utils.parseUnits(fatherStaked, fatherDecimals)
+        try {
+            const result = await contract.withdraw(realFatherStaked);
+            provider
+                .getTransaction(result.hash)
+                .then((tx) => {
+                    // 監聽交易上鍊事件
+                    tx.wait().then(async (receipt) => {
+                        //  授權成功
+                        console.log(`交易已上鍊，區塊高度為 ${receipt.blockNumber}`)
+                    })
+                })
+        } catch (err) {
+            console.log(err)
         }
+    }
+
+    const handleClaim = async () => {
+        try {
+            const result = await contract.deposit(0, defaultInviter);
+            provider
+                .getTransaction(result.hash)
+                .then((tx) => {
+                    // 監聽交易上鍊事件
+                    tx.wait().then(async (receipt) => {
+                        //  授權成功
+                        console.log(`交易已上鍊，區塊高度為 ${receipt.blockNumber}`)
+                    })
+                })
+        } catch (err) {
+            console.log(err)
+        }
+    }
+    const approveAndSendTx = async () => {
+        if (defaultAccount === null) return;
         if (inputValue === "" || inputValue === null) return;
 
+        const amount = ethers.utils.parseUnits(inputValue, fatherDecimals);
         try {
             const isApproved = await checkApproved(amount);
             if (!isApproved) {
@@ -647,7 +681,7 @@ const StakingCard = ({
 
     const checkApproved = async (amount) => {
         try {
-            const result = await JNYContract.allowance(
+            const result = await fatherContract.allowance(
                 defaultAccount, contract.address
             )
             if (+result >= +amount)
@@ -660,11 +694,12 @@ const StakingCard = ({
 
 
     const approveTokenToContract = async (amount) => {
+        console.log(amount)
         if (defaultAccount === null) {
             return;
         }
         try {
-            const result = await JNYContract.approve(
+            const result = await fatherContract.approve(
                 contract.address, amount
             )
 
@@ -731,6 +766,10 @@ const StakingCard = ({
                 <TableComponent
                     fatherTokenName={fatherTokenName}
                     sonTokenName={sonTokenName}
+                    language={language}
+                    fatherHolding={fatherBalance}
+                    fatherStaked={fatherStaked}
+                    sonGained={sonGained}
                 />
                 <div style={{
                     display: 'flex',
@@ -761,7 +800,7 @@ const StakingCard = ({
                     display: 'flex',
                     margin: '20px'
                 }}>
-                    <button>
+                    <button onClick={handleClaim}>
                         {
                             language === "EN"
                                 ? "Claim "
@@ -774,7 +813,7 @@ const StakingCard = ({
                     display: 'flex',
                     margin: '20px'
                 }}>
-                    <button>
+                    <button onClick={handleWithdraw}>
                         {
                             language === "EN"
                                 ? " Unstake"
@@ -790,22 +829,50 @@ const StakingCard = ({
 const TableComponent = ({
     fatherTokenName,
     sonTokenName,
+    language,
+    fatherHolding,
+    fatherStaked,
+    sonGained
 }) => {
     return (
         <div style={{ display: 'flex', flexDirection: 'column' }}>
             <table style={{ border: '1px solid black', width: '100%', borderRadius: '10px' }}>
                 <tbody>
                     <tr>
-                        <td style={{ border: '1px solid black', padding: '8px' }}>持倉 {fatherTokenName}</td>
-                        <td style={{ border: '1px solid black', padding: '8px' }}>0</td>
+                        <td style={{ border: '1px solid black', padding: '8px' }}>
+
+                            {
+                                language === "EN"
+                                    ? "Holding "
+                                    : "持有 "
+                            } {fatherTokenName}
+                        </td>
+                        <td style={{ border: '1px solid black', padding: '8px' }}>{fatherHolding}</td>
                     </tr>
                     <tr>
-                        <td style={{ border: '1px solid black', padding: '8px' }}>質押 {fatherTokenName}</td>
-                        <td style={{ border: '1px solid black', padding: '8px' }}>0</td>
+                        <td style={{ border: '1px solid black', padding: '8px' }}>
+                            {
+                                language === "EN"
+                                    ? "Staked "
+                                    : "質押中  "
+                            } {fatherTokenName}
+                        </td>
+                        <td style={{
+                            border: '1px solid black', padding: '8px',
+                        }}>
+                            {fatherStaked}
+                        </td>
                     </tr>
                     <tr>
-                        <td style={{ border: '1px solid black', padding: '8px' }}>{sonTokenName} 收益</td>
-                        <td style={{ border: '1px solid black', padding: '8px' }}>0</td>
+                        <td style={{ border: '1px solid black', padding: '8px' }}>
+                            {
+                                language === "EN"
+                                    ? "Claimable "
+                                    : "可領取的 "
+                            }
+                            {sonTokenName}
+                        </td>
+                        <td style={{ border: '1px solid black', padding: '8px' }}>{sonGained}</td>
                     </tr>
                 </tbody>
             </table>
@@ -849,11 +916,40 @@ const Staking = ({ defaultAccount, language }) => {
 
     const [provider, setProvider] = useState(null);
     const [signer, setSigner] = useState(null);
-    const [contract, setContract] = useState(null);
-    const [jnyContract, setJNYContract] = useState(null);
 
-    const StakingCA = "0x251D75bCB93c7B3bc90e8ba22C0dD5B220C67299";
-    const JNYCA = "";
+    const [contract, setContract] = useState(null);
+    const [lpStakingContract, setLpStakingContract] = useState(null);
+    const [jnyContract, setJNYContract] = useState(null);
+    const [_1020Contract, set1020Contract] = useState(null);
+
+    const [jnyDecimals, setJNYDecimals] = useState(null);
+    const [jnyBalance, setJNYBalance] = useState(null);
+    const [jnyStaked, setJNYStaked] = useState(null);
+
+    const [_1020deicmals, set1020Decimals] = useState(null);
+    const [earned1020, setEarned1020] = useState(null);
+
+    const [_1020LPContract, set1020LPContract] = useState(null);
+    const [_1020LPDecimals, set1020LPDecimals] = useState(null);
+    const [_1020LPBalance, set1020LPBalance] = useState(null);
+
+
+    //質押合約
+    const StakingCA = "0xF96407a0ecd34E36345Ee43a35a48AC4C2Fe5Ea7";
+    const LPStakingCA = "0xF96407a0ecd34E36345Ee43a35a48AC4C2Fe5Ea7"
+
+    //代幣合約
+    const JNYCA = "0x2BDF6DDbfEc9781aAbee00D7e028D3efcCaD473d";
+    const CA_1020 = "0x9fb6CbC7e1651237Bc1BD22c2F96BDa6D762673a"
+    const LP_1020 = "0x9fb6CbC7e1651237Bc1BD22c2F96BDa6D762673a"
+    const PointCA = "0x9fb6CbC7e1651237Bc1BD22c2F96BDa6D762673a"
+
+    const parseAndTruncate = (amount, afterDeciaml) => {
+        const parsedAmount = parseFloat(amount);
+        const truncatedAmount = parsedAmount.toFixed(afterDeciaml);
+        return truncatedAmount;
+    }
+
     const updateEthers = async () => {
         try {
             const tempProvider = new ethers.providers.Web3Provider(window.ethereum);
@@ -862,9 +958,47 @@ const Staking = ({ defaultAccount, language }) => {
             const tempSigner = tempProvider.getSigner();
             setSigner(tempSigner);
 
+            //  合約資料
             const tempContract = new ethers.Contract(StakingCA, StakingABI, tempSigner)
             setContract(tempContract);
+            const tempLPStakingContract = new ethers.Contract(LPStakingCA, StakingABI, tempSigner)
+            setLpStakingContract(tempLPStakingContract);
 
+            //  代幣資料
+            const tempJNYContract = new ethers.Contract(JNYCA, TokenABI, tempSigner)
+            setJNYContract(tempJNYContract);
+            const temp1020Contract = new ethers.Contract(CA_1020, TokenABI, tempSigner)
+            set1020Contract(tempJNYContract);
+            const temp1020LPContract = new ethers.Contract(LP_1020, TokenABI, tempSigner)
+            set1020LPContract(tempJNYContract);
+            const tempPointContract = new ethers.Contract(PointCA, TokenABI, tempSigner)
+            set1020LPContract(tempJNYContract);
+
+            //  代幣精度
+            const tempDecimalJNY = await tempJNYContract.decimals();
+            setJNYDecimals(tempDecimalJNY);
+            const tempDecimal1020 = await temp1020Contract.decimals();
+            set1020Decimals(tempDecimal1020);
+            const tempDecimal1020LP = await temp1020LPContract.decimals();
+            set1020LPDecimals(tempDecimal1020LP);
+
+            const tempBalanceJNY = await tempJNYContract.balanceOf(defaultAccount);
+            const formattedBalance = ethers.utils.formatUnits(`${tempBalanceJNY}`, tempDecimalJNY);
+            setJNYBalance(parseAndTruncate(formattedBalance, 2));
+
+            const tempStakedJNY = await tempContract.getUserTotalAmount(defaultAccount);
+            const formattedStakedBalance = ethers.utils.formatUnits(`${tempStakedJNY}`, tempDecimalJNY);
+            setJNYStaked(parseAndTruncate(formattedStakedBalance, 2));
+
+            const tempGained1020 = await tempContract.pendingReward(defaultAccount);
+            const formattedPendingReward = ethers.utils.formatUnits(`${tempGained1020}`, tempDecimal1020);
+            setEarned1020(parseAndTruncate(formattedPendingReward, 5));
+
+            const temp1020LPBalance = await temp1020Contract.balanceOf(defaultAccount);
+            const formatted1020LPBalance = ethers.utils.formatUnits(`${temp1020LPBalance}`, tempDecimal1020LP);
+            set1020LPBalance(parseAndTruncate(formatted1020LPBalance, 9))
+
+            const temp1020LPStaked = await tempContract.pendingReward(defaultAccount);
             // const tempUsdtContract = new ethers.Contract(USDTContractAddress, usdtabi, tempSigner)
             // setUsdtContract(tempUsdtContract);
 
@@ -897,8 +1031,12 @@ const Staking = ({ defaultAccount, language }) => {
                 language={language}
                 contract={contract}
                 defaultAccount={defaultAccount}
-                JNYContract={jnyContract}
+                fatherContract={jnyContract}
                 provider={provider}
+                fatherDecimals={jnyDecimals}
+                fatherBalance={jnyBalance}
+                fatherStaked={jnyStaked}
+                sonGained={earned1020}
             />
             <StakingCard
                 fatherTokenName={"1020LP"}
@@ -906,8 +1044,12 @@ const Staking = ({ defaultAccount, language }) => {
                 language={language}
                 contract={contract}
                 defaultAccount={defaultAccount}
-                JNYContract={jnyContract}
+                fatherContract={_1020LPContract}
                 provider={provider}
+                fatherDecimals={_1020LPDecimals}
+                fatherBalance={_1020LPBalance}
+                fatherStaked={jnyStaked}
+                sonGained={earned1020}
             />
         </section>
     )

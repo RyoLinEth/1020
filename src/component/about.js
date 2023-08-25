@@ -141,7 +141,7 @@ const Navbar = ({ setLan, defaultAccountChange }) => {
             data-elementor-type="header" data-elementor-id={365} className="elementor elementor-365 elementor-location-header">
 
             <section className="elementor-section elementor-top-section elementor-element elementor-element-b51501d elementor-section-height-min-height elementor-section-boxed elementor-section-height-default elementor-section-items-middle" data-id="b51501d" data-element_type="section" data-settings="{&quot;background_background&quot;:&quot;classic&quot;}"
-                style={{ backgroundColor: '#FF963C', color: '#A017D7', fontSize: '20px', fontWeight: 'bolder', height: '100px', position: 'fixed', width: '100vw' }}
+                style={{ backgroundColor: '#FF963C', color: '#A017D7', fontSize: '20px', fontWeight: 'bolder', height: '100px', position: 'fixed', width: '100vw', zIndex: '200' }}
             >
                 <div style={{
                     display: 'flex',
@@ -1097,6 +1097,87 @@ const TableComponent = ({
     );
 }
 
+
+const ProductCard = ({ product, addToCart, language }) => {
+    const { name, price, image, description } = product;
+
+    const styles = {
+        container: {
+            fontFamily: 'Arial, sans-serif',
+            textAlign: 'center',
+            padding: '20px',
+        },
+        header: {
+            fontSize: '24px',
+            marginBottom: '20px',
+        },
+        productList: {
+            display: 'flex',
+            justifyContent: 'space-around',
+            flexWrap: 'wrap',
+        },
+        productCard: {
+            border: '1px solid #ccc',
+            borderRadius: '8px',
+            padding: '10px',
+            margin: '10px',
+            width: '240px',
+        },
+        productImage: {
+            width: '100%',
+            borderRadius: '8px',
+        },
+        productName: {
+            fontSize: '18px',
+            margin: '10px 0',
+        },
+        productPrice: {
+            fontSize: '16px',
+            fontWeight: 'bold',
+        },
+        productDescription: {
+            fontSize: '14px',
+            marginBottom: '10px',
+        },
+        addToCartButton: {
+            backgroundColor: '#007bff',
+            color: '#fff',
+            border: 'none',
+            borderRadius: '4px',
+            padding: '5px 10px',
+            cursor: 'pointer',
+        },
+        cart: {
+            marginTop: '20px',
+        },
+        cartItems: {
+            listStyleType: 'none',
+            padding: '0',
+        },
+    };
+
+    return (
+        <div style={styles.productCard}>
+            {/* <img src={image} alt={name} style={styles.productImage} /> */}
+            <h3 style={styles.productName}>{name}</h3>
+            <p style={styles.productPrice}>{price}
+                {
+                    language === "EN"
+                        ? " Points" : " 積分"
+                }
+            </p>
+            <p style={styles.productDescription}>{description}</p>
+            <button onClick={() => addToCart(product)} style={styles.addToCartButton}>
+                {
+                    language === "EN"
+                        ? "Pay" : "支付"
+                }
+            </button>
+        </div>
+    );
+};
+
+
 const Marquee = ({ content, speed }) => {
     const [offset, setOffset] = useState(0);
 
@@ -1253,10 +1334,6 @@ const Staking = ({ defaultAccount, language }) => {
         updateEthers();
     }, [defaultAccount])
 
-    const handleNotOpen = () => {
-        console.log("Area Not Open")
-    }
-
     return (
         <section id="Staking"
             style={{
@@ -1264,7 +1341,7 @@ const Staking = ({ defaultAccount, language }) => {
                 display: 'flex',
                 flexDirection: 'row',
                 flexWrap: 'wrap',
-                backgroundColor: 'purple',
+                backgroundColor: 'rgb(83,0,117)',
                 justifyContent: 'space-evenly',
                 padding: '20px',
             }}>
@@ -1302,6 +1379,94 @@ const Staking = ({ defaultAccount, language }) => {
     )
 }
 
+const Shop = ({ language }) => {
+    const productListstyles = {
+        display: 'flex',
+        gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))',
+        gap: '20px',
+        margin: '20px',
+        flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center',
+    };
+
+    const products = [
+        {
+            id: 1,
+            name: 'Product 1',
+            price: 19.99,
+            image: 'product1.jpg',
+            description: 'Description of Product 1...',
+        },
+        {
+            id: 2,
+            name: 'Product 2',
+            price: 24.99,
+            image: 'product2.jpg',
+            description: 'Description of Product 2...',
+        },
+        {
+            id: 3,
+            name: 'Product 3',
+            price: 29.99,
+            image: 'product2.jpg',
+            description: 'Description of Product 2...',
+        },
+        {
+            id: 4,
+            name: 'Product 4',
+            price: 34.99,
+            image: 'product2.jpg',
+            description: 'Description of Product 2...',
+        },
+        {
+            id: 5,
+            name: 'Product 5',
+            price: 39.99,
+            image: 'product2.jpg',
+            description: 'Description of Product 2...',
+        },
+        // Add more products...
+    ];
+    const addToCart = () => {
+        console.log("Added");
+    }
+    const containerStyles = {
+        display: 'grid',
+        margin: '20px',
+        marginLeft: '5vw'
+    }
+    return (
+        <div style={{
+            display: 'flex',
+            flexDirection: 'column',
+            textAlign: 'center',
+            justifyContent: 'center'
+        }}>
+            <h1 style={{
+                color: '#A017D7', fontWeight: 'bolder'
+            }}>
+                {
+                    language === "EN"
+                        ? "Points Shop"
+                        : "積分商城"
+                }
+
+            </h1>
+            <div>
+                <div style={productListstyles}>
+                    {products.map(product => (
+                        <ProductCard
+                            key={product.id}
+                            product={product}
+                            addToCart={addToCart}
+                            language={language}
+                        />
+                    ))}
+                </div>
+            </div>
+        </div >
+    )
+}
+
 const Footer = () => {
     return (
         <footer data-elementor-type="footer" data-elementor-id={387} className="elementor elementor-387 elementor-location-footer">
@@ -1323,6 +1488,9 @@ const About = () => {
         setDefaultAccount(value);
         console.log(value)
     }
+
+    const stakingCenterText = language === "EN" ? "Staking Center" : "質押中心";
+    const pointShopText = language === "EN" ? "Points Shop" : "積分商城";
     return (
         <div style={{ backgroundColor: '#FDF8FF' }}>
             <Navbar setLan={languageHandler} defaultAccountChange={handleDefaultAccountChange} />
@@ -1333,12 +1501,17 @@ const About = () => {
                 <Content2 language={language} />
 
                 <Marquee
-                    content={"Staking Center"}
+                    content={stakingCenterText}
                     speed={10}
                 />
                 <Staking defaultAccount={defaultAccount} language={language} />
-            </div>
 
+                <Marquee
+                    content={null}
+                    speed={10}
+                />
+                <Shop language={language} />
+            </div>
             <Footer />
         </div>
     );

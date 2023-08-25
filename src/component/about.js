@@ -80,11 +80,15 @@ const Navbar = ({ setLan, defaultAccountChange }) => {
         if (language === "EN") {
             setLanguage("CH")
             setLan("CH")
+            if (defaultAccount !== null) return;
+            setConnectButtonText(text.ch)
             return;
         }
         if (language === "CH") {
             setLanguage("EN")
             setLan("EN")
+            if (defaultAccount !== null) return;
+            setConnectButtonText(text.en)
             return;
         }
     }
@@ -604,6 +608,89 @@ const Content2 = ({ language }) => {
     )
 }
 
+const CountdownTimer = ({ targetDate, language }) => {
+    const calculateTimeLeft = () => {
+        const now = new Date().getTime();
+        const targetTime = new Date(targetDate).getTime();
+        const timeLeft = targetTime - now;
+
+        if (timeLeft < 0) {
+            return {
+                days: 0,
+                hours: 0,
+                minutes: 0,
+                seconds: 0
+            };
+        }
+
+        const days = Math.floor(timeLeft / (1000 * 60 * 60 * 24));
+        const hours = Math.floor((timeLeft % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        const minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
+        const seconds = Math.floor((timeLeft % (1000 * 60)) / 1000);
+
+        return {
+            days,
+            hours,
+            minutes,
+            seconds
+        };
+    };
+
+    const [timeLeft, setTimeLeft] = useState(calculateTimeLeft());
+
+    useEffect(() => {
+        const timer = setInterval(() => {
+            setTimeLeft(calculateTimeLeft());
+        }, 1000);
+
+        return () => {
+            clearInterval(timer);
+        };
+    }, []);
+    const countdownBoxStyle = {
+        display: 'inline-block',
+        textAlign: 'center',
+        margin: '0 10px',
+    };
+
+    const countdownValueStyle = {
+        fontSize: '24px',
+        fontWeight: 'bold',
+    };
+
+    const countdownLabelStyle = {
+        fontSize: '14px',
+        color: '#888',
+    };
+
+    return (
+        <div>
+            <span style={{ marginTop: '20px', marginBottom: '40px' }}>
+                {language === "EN"
+                    ? "Open In " : "即將開放"
+                }
+            </span>
+            <br />
+            <div style={countdownBoxStyle}>
+                <div style={countdownValueStyle}>{timeLeft.days}</div>
+                <div style={countdownLabelStyle}>Days</div>
+            </div>
+            <div style={countdownBoxStyle}>
+                <div style={countdownValueStyle}>{timeLeft.hours}</div>
+                <div style={countdownLabelStyle}>Hours</div>
+            </div>
+            <div style={countdownBoxStyle}>
+                <div style={countdownValueStyle}>{timeLeft.minutes}</div>
+                <div style={countdownLabelStyle}>Minutes</div>
+            </div>
+            <div style={countdownBoxStyle}>
+                <div style={countdownValueStyle}>{timeLeft.seconds}</div>
+                <div style={countdownLabelStyle}>Seconds</div>
+            </div>
+        </div>
+    );
+};
+
 const StakingCard = ({
     fatherTokenName,
     sonTokenName,
@@ -615,7 +702,9 @@ const StakingCard = ({
     fatherBalance,
     fatherStaked,
     sonGained,
-    provider
+    provider,
+    isSuccess,
+    isAreaOpen
 }) => {
 
     const [inputValue, setInputValue] = useState(''); // 初始化狀態為空字符串
@@ -639,6 +728,7 @@ const StakingCard = ({
                     tx.wait().then(async (receipt) => {
                         //  授權成功
                         console.log(`交易已上鍊，區塊高度為 ${receipt.blockNumber}`)
+                        isSuccess(true)
                     })
                 })
         } catch (err) {
@@ -656,6 +746,7 @@ const StakingCard = ({
                     tx.wait().then(async (receipt) => {
                         //  授權成功
                         console.log(`交易已上鍊，區塊高度為 ${receipt.blockNumber}`)
+                        isSuccess(true)
                     })
                 })
         } catch (err) {
@@ -732,98 +823,224 @@ const StakingCard = ({
                     tx.wait().then(async (receipt) => {
                         //  授權成功
                         console.log(`交易已上鍊，區塊高度為 ${receipt.blockNumber}`)
+                        isSuccess(true)
                     })
                 })
         } catch (err) {
             console.log(err)
         }
     }
+    if (isAreaOpen)
+        return (
+            <div style={{
+                padding: '20px', minWidth: '360px', width: '45vw',
+                margin: '10px',
+                color: 'purple',
+                backgroundColor: 'white',
+                borderRadius: '20px'
+            }}>
+                <div>
+                    <h4 style={{ textAlign: 'center' }}>
 
-    return (
-        <div style={{
-            padding: '20px', minWidth: '360px', width: '45vw',
-            margin: '10px',
-            color: 'purple',
-            backgroundColor: 'white',
-            borderRadius: '20px'
-        }}>
-            <div>
-                <h4 style={{ textAlign: 'center' }}>
-
-                    {
-                        language === "EN"
-                            ? " Stake "
-                            : " 質押 "
-                    }
-                    {fatherTokenName}
-
-                    {
-                        language === "EN"
-                            ? " to Earn "
-                            : " 賺取 "
-                    } {sonTokenName}
-                </h4>
-                <TableComponent
-                    fatherTokenName={fatherTokenName}
-                    sonTokenName={sonTokenName}
-                    language={language}
-                    fatherHolding={fatherBalance}
-                    fatherStaked={fatherStaked}
-                    sonGained={sonGained}
-                />
-                <div style={{
-                    display: 'flex',
-                    margin: '20px',
-                    alignItems: 'center'
-                }}>
-                    <button onClick={approveAndSendTx}>
                         {
                             language === "EN"
-                                ? " Stake"
-                                : " 質押"
+                                ? " Stake "
+                                : " 質押 "
                         }
-                    </button>
-                    <input
-                        placeholder={placeHolderText}
-                        type="number"
-                        value={inputValue}
-                        onChange={handleInputChange}
-                        style={{
-                            marginLeft: '20px',
-                            marginRight: '20px',
-                            width: '100px'
-                        }}
+                        {fatherTokenName}
+
+                        {
+                            language === "EN"
+                                ? " to Earn "
+                                : " 賺取 "
+                        } {sonTokenName}
+                    </h4>
+                    <TableComponent
+                        fatherTokenName={fatherTokenName}
+                        sonTokenName={sonTokenName}
+                        language={language}
+                        fatherHolding={fatherBalance}
+                        fatherStaked={fatherStaked}
+                        sonGained={sonGained}
                     />
-                    {fatherTokenName}
-                </div>
-                <div style={{
-                    display: 'flex',
-                    margin: '20px'
-                }}>
-                    <button onClick={handleClaim}>
-                        {
-                            language === "EN"
-                                ? "Claim "
-                                : "領取 "
-                        }
-                        {sonTokenName}
-                    </button>
-                </div>
-                <div style={{
-                    display: 'flex',
-                    margin: '20px'
-                }}>
-                    <button onClick={handleWithdraw}>
-                        {
-                            language === "EN"
-                                ? " Unstake"
-                                : " 解除質押"
-                        } {fatherTokenName}
-                    </button>
+                    <div style={{
+                        display: 'flex',
+                        margin: '20px',
+                        alignItems: 'center'
+                    }}>
+                        <button onClick={approveAndSendTx}>
+                            {
+                                language === "EN"
+                                    ? " Stake"
+                                    : " 質押"
+                            }
+                        </button>
+                        <input
+                            placeholder={placeHolderText}
+                            type="number"
+                            value={inputValue}
+                            onChange={handleInputChange}
+                            style={{
+                                marginLeft: '20px',
+                                marginRight: '20px',
+                                width: '100px'
+                            }}
+                        />
+                        {fatherTokenName}
+                    </div>
+                    <div style={{
+                        display: 'flex',
+                        margin: '20px'
+                    }}>
+                        <button onClick={handleClaim}>
+                            {
+                                language === "EN"
+                                    ? "Claim "
+                                    : "領取 "
+                            }
+                            {sonTokenName}
+                        </button>
+                    </div>
+                    <div style={{
+                        display: 'flex',
+                        margin: '20px'
+                    }}>
+                        <button onClick={handleWithdraw}>
+                            {
+                                language === "EN"
+                                    ? " Unstake"
+                                    : " 解除質押"
+                            } {fatherTokenName}
+                        </button>
+                    </div>
                 </div>
             </div>
-        </div>
-    )
+        )
+    else
+        return (
+            <div style={{ position: 'relative' }}>
+                <span style={{
+                    position: 'absolute',
+                    marginLeft: '15vw',
+                    marginTop: '10vh',
+                    zIndex: '100',
+                    fontSize: '30px',
+                    fontWeight: 'bolder',
+                    color: 'blueviolet',
+                }}>
+                    <div style={{
+                        color: 'gray'
+                    }}>
+                        <CountdownTimer targetDate={"2023-08-28T23:59:59"} language={language} />
+                    </div>
+                    <br />
+                    <h4 style={{ textAlign: 'center' }}>
+
+                        {
+                            language === "EN"
+                                ? " Stake "
+                                : " 質押 "
+                        }
+                        {fatherTokenName}
+
+                        {
+                            language === "EN"
+                                ? " to Earn "
+                                : " 賺取 "
+                        } {sonTokenName}
+                    </h4>
+                </span>
+                <div style={{
+                    filter: 'blur(10px)',
+                    position: 'relative',
+                    zIndex: '1'
+                }}>
+                    <div style={{
+                        padding: '20px', minWidth: '360px', width: '45vw',
+                        margin: '10px',
+                        color: 'purple',
+                        backgroundColor: 'white',
+                        borderRadius: '20px'
+                    }}>
+                        <div>
+                            <h4 style={{ textAlign: 'center' }}>
+
+                                {
+                                    language === "EN"
+                                        ? " Stake "
+                                        : " 質押 "
+                                }
+                                {fatherTokenName}
+
+                                {
+                                    language === "EN"
+                                        ? " to Earn "
+                                        : " 賺取 "
+                                } {sonTokenName}
+                            </h4>
+                            <TableComponent
+                                fatherTokenName={fatherTokenName}
+                                sonTokenName={sonTokenName}
+                                language={language}
+                                fatherHolding={fatherBalance}
+                                fatherStaked={fatherStaked}
+                                sonGained={sonGained}
+                            />
+                            <div style={{
+                                display: 'flex',
+                                margin: '20px',
+                                alignItems: 'center'
+                            }}>
+                                <button>
+                                    {
+                                        language === "EN"
+                                            ? " Stake"
+                                            : " 質押"
+                                    }
+                                </button>
+                                <input
+                                    placeholder={placeHolderText}
+                                    type="number"
+                                    value={inputValue}
+                                    onChange={handleInputChange}
+                                    style={{
+                                        marginLeft: '20px',
+                                        marginRight: '20px',
+                                        width: '100px'
+                                    }}
+                                />
+                                {fatherTokenName}
+                            </div>
+                            <div style={{
+                                display: 'flex',
+                                margin: '20px'
+                            }}>
+                                <button>
+                                    {
+                                        language === "EN"
+                                            ? "Claim "
+                                            : "領取 "
+                                    }
+                                    {sonTokenName}
+                                </button>
+                            </div>
+                            <div style={{
+                                display: 'flex',
+                                margin: '20px'
+                            }}>
+                                <button>
+                                    {
+                                        language === "EN"
+                                            ? " Unstake"
+                                            : " 解除質押"
+                                    } {fatherTokenName}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        )
 }
 
 const TableComponent = ({
@@ -917,10 +1134,15 @@ const Staking = ({ defaultAccount, language }) => {
     const [provider, setProvider] = useState(null);
     const [signer, setSigner] = useState(null);
 
+    //  Staking Contract
     const [contract, setContract] = useState(null);
     const [lpStakingContract, setLpStakingContract] = useState(null);
+
+    //  Token Contract
     const [jnyContract, setJNYContract] = useState(null);
     const [_1020Contract, set1020Contract] = useState(null);
+    const [_1020LPContract, set1020LPContract] = useState(null);
+    const [pointContract, setPointContract] = useState(null);
 
     const [jnyDecimals, setJNYDecimals] = useState(null);
     const [jnyBalance, setJNYBalance] = useState(null);
@@ -929,10 +1151,12 @@ const Staking = ({ defaultAccount, language }) => {
     const [_1020deicmals, set1020Decimals] = useState(null);
     const [earned1020, setEarned1020] = useState(null);
 
-    const [_1020LPContract, set1020LPContract] = useState(null);
     const [_1020LPDecimals, set1020LPDecimals] = useState(null);
     const [_1020LPBalance, set1020LPBalance] = useState(null);
+    const [_1020LPStaked, set1020LPStaked] = useState(null);
 
+    const [pointDeicmals, setPointDecimals] = useState(null);
+    const [earnedPoint, setEarnedPoint] = useState(null);
 
     //質押合約
     const StakingCA = "0xF96407a0ecd34E36345Ee43a35a48AC4C2Fe5Ea7";
@@ -948,6 +1172,11 @@ const Staking = ({ defaultAccount, language }) => {
         const parsedAmount = parseFloat(amount);
         const truncatedAmount = parsedAmount.toFixed(afterDeciaml);
         return truncatedAmount;
+    }
+
+    const handleIsTxOnChain = async (value) => {
+        console.log("New Transaction On Chain, Reload Data")
+        await updateEthers();
     }
 
     const updateEthers = async () => {
@@ -972,7 +1201,7 @@ const Staking = ({ defaultAccount, language }) => {
             const temp1020LPContract = new ethers.Contract(LP_1020, TokenABI, tempSigner)
             set1020LPContract(tempJNYContract);
             const tempPointContract = new ethers.Contract(PointCA, TokenABI, tempSigner)
-            set1020LPContract(tempJNYContract);
+            setPointContract(tempPointContract);
 
             //  代幣精度
             const tempDecimalJNY = await tempJNYContract.decimals();
@@ -981,27 +1210,39 @@ const Staking = ({ defaultAccount, language }) => {
             set1020Decimals(tempDecimal1020);
             const tempDecimal1020LP = await temp1020LPContract.decimals();
             set1020LPDecimals(tempDecimal1020LP);
+            const tempDecimalPoint = await tempPointContract.decimals();
+            setPointDecimals(tempDecimalPoint);
 
+            //  質押 JNY 獲得 1020 資料
+            //  持有JNY
             const tempBalanceJNY = await tempJNYContract.balanceOf(defaultAccount);
             const formattedBalance = ethers.utils.formatUnits(`${tempBalanceJNY}`, tempDecimalJNY);
             setJNYBalance(parseAndTruncate(formattedBalance, 2));
 
+            //  質押JNY
             const tempStakedJNY = await tempContract.getUserTotalAmount(defaultAccount);
             const formattedStakedBalance = ethers.utils.formatUnits(`${tempStakedJNY}`, tempDecimalJNY);
             setJNYStaked(parseAndTruncate(formattedStakedBalance, 2));
 
+            //  可提領的1020
             const tempGained1020 = await tempContract.pendingReward(defaultAccount);
-            const formattedPendingReward = ethers.utils.formatUnits(`${tempGained1020}`, tempDecimal1020);
-            setEarned1020(parseAndTruncate(formattedPendingReward, 5));
+            const formattedGained1020 = ethers.utils.formatUnits(`${tempGained1020}`, tempDecimal1020);
+            setEarned1020(parseAndTruncate(formattedGained1020, 5));
 
+            //  持有 1020LP
             const temp1020LPBalance = await temp1020Contract.balanceOf(defaultAccount);
             const formatted1020LPBalance = ethers.utils.formatUnits(`${temp1020LPBalance}`, tempDecimal1020LP);
             set1020LPBalance(parseAndTruncate(formatted1020LPBalance, 9))
 
-            const temp1020LPStaked = await tempContract.pendingReward(defaultAccount);
-            // const tempUsdtContract = new ethers.Contract(USDTContractAddress, usdtabi, tempSigner)
-            // setUsdtContract(tempUsdtContract);
+            //  質押 1020LP
+            const tempStaked1020LP = await tempLPStakingContract.getUserTotalAmount(defaultAccount);
+            const formattedStaked1020LPBalance = ethers.utils.formatUnits(`${tempStaked1020LP}`, tempDecimal1020LP);
+            set1020LPStaked(parseAndTruncate(formattedStaked1020LPBalance, 9));
 
+            //  可提領的 Point
+            const tempGainedPoint = await tempLPStakingContract.pendingReward(defaultAccount);
+            const formattedGainedPoint = ethers.utils.formatUnits(`${tempGainedPoint}`, tempDecimalPoint);
+            setEarnedPoint(parseAndTruncate(formattedGainedPoint, 9));
         } catch (err) {
             console.log(err)
         }
@@ -1012,8 +1253,10 @@ const Staking = ({ defaultAccount, language }) => {
         updateEthers();
     }, [defaultAccount])
 
+    const handleNotOpen = () => {
+        console.log("Area Not Open")
+    }
 
-    console.log("In Staking " + defaultAccount)
     return (
         <section id="Staking"
             style={{
@@ -1037,6 +1280,8 @@ const Staking = ({ defaultAccount, language }) => {
                 fatherBalance={jnyBalance}
                 fatherStaked={jnyStaked}
                 sonGained={earned1020}
+                isSuccess={handleIsTxOnChain}
+                isAreaOpen={true}
             />
             <StakingCard
                 fatherTokenName={"1020LP"}
@@ -1048,8 +1293,10 @@ const Staking = ({ defaultAccount, language }) => {
                 provider={provider}
                 fatherDecimals={_1020LPDecimals}
                 fatherBalance={_1020LPBalance}
-                fatherStaked={jnyStaked}
-                sonGained={earned1020}
+                fatherStaked={_1020LPStaked}
+                sonGained={earnedPoint}
+                isSuccess={handleIsTxOnChain}
+                isAreaOpen={false}
             />
         </section>
     )

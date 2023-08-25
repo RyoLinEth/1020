@@ -1031,6 +1031,13 @@ const StakingCard = ({
                         backgroundColor: 'white',
                         borderRadius: '20px'
                     }}>
+                        <h3 style={{ textAlign: 'center' }}>
+                            {
+                                language === "EN"
+                                    ? `Phase ${Phase}`
+                                    : `第 ${Phase} 期`
+                            }
+                        </h3>
                         <div>
                             <h4 style={{ textAlign: 'center' }}>
 
@@ -1056,6 +1063,7 @@ const StakingCard = ({
                                 sonGained={sonGained}
                                 startBlock={startBlock}
                                 bonusEndBlock={bonusEndBlock}
+                                hasBeenClaimdReward={hasBeenClaimdReward}
                             />
                             <div style={{
                                 display: 'flex',
@@ -1126,7 +1134,7 @@ const TableComponent = ({
     hasBeenClaimdReward
 }) => {
     const BlockchainTimestampConverter = ({ timestamp }) => {
-        if (timestamp===null) return;
+        if (timestamp === null) return;
         // 將區塊鍊的時間戳轉換為正式的時間
         const formattedTime = new Date(timestamp * 1000).toLocaleString();
         return (<span>{formattedTime}</span>)

@@ -663,6 +663,7 @@ const Content2 = ({ language, _1020CA }) => {
 }
 
 const CountdownTimer = ({ targetDate, language }) => {
+    const timeUnknown = true;
     const calculateTimeLeft = () => {
         const now = new Date().getTime();
         const targetTime = new Date(targetDate).getTime();
@@ -716,33 +717,60 @@ const CountdownTimer = ({ targetDate, language }) => {
         fontSize: '14px',
         color: '#888',
     };
-
-    return (
-        <div>
-            <span style={{ marginTop: '20px', marginBottom: '40px' }}>
-                {language === "EN"
-                    ? "Open In " : "即將開放"
-                }
-            </span>
-            <br />
-            <div style={countdownBoxStyle}>
-                <div style={countdownValueStyle}>{timeLeft.days}</div>
-                <div style={countdownLabelStyle}>Days</div>
+    if (!timeUnknown)
+        return (
+            <div>
+                <span style={{ marginTop: '20px', marginBottom: '40px' }}>
+                    {language === "EN"
+                        ? "Open In " : "即將開放"
+                    }
+                </span>
+                <br />
+                <div style={countdownBoxStyle}>
+                    <div style={countdownValueStyle}>{timeLeft.days}</div>
+                    <div style={countdownLabelStyle}>Days</div>
+                </div>
+                <div style={countdownBoxStyle}>
+                    <div style={countdownValueStyle}>{timeLeft.hours}</div>
+                    <div style={countdownLabelStyle}>Hours</div>
+                </div>
+                <div style={countdownBoxStyle}>
+                    <div style={countdownValueStyle}>{timeLeft.minutes}</div>
+                    <div style={countdownLabelStyle}>Minutes</div>
+                </div>
+                <div style={countdownBoxStyle}>
+                    <div style={countdownValueStyle}>{timeLeft.seconds}</div>
+                    <div style={countdownLabelStyle}>Seconds</div>
+                </div>
             </div>
-            <div style={countdownBoxStyle}>
-                <div style={countdownValueStyle}>{timeLeft.hours}</div>
-                <div style={countdownLabelStyle}>Hours</div>
+        );
+    else
+        return (
+            <div>
+                <span style={{ marginTop: '20px', marginBottom: '40px' }}>
+                    {language === "EN"
+                        ? "Open In " : "即將開放"
+                    }
+                </span>
+                <br />
+                <div style={countdownBoxStyle}>
+                    <div style={countdownValueStyle}>XX</div>
+                    <div style={countdownLabelStyle}>Days</div>
+                </div>
+                <div style={countdownBoxStyle}>
+                    <div style={countdownValueStyle}>XX</div>
+                    <div style={countdownLabelStyle}>Hours</div>
+                </div>
+                <div style={countdownBoxStyle}>
+                    <div style={countdownValueStyle}>XX</div>
+                    <div style={countdownLabelStyle}>Minutes</div>
+                </div>
+                <div style={countdownBoxStyle}>
+                    <div style={countdownValueStyle}>XX</div>
+                    <div style={countdownLabelStyle}>Seconds</div>
+                </div>
             </div>
-            <div style={countdownBoxStyle}>
-                <div style={countdownValueStyle}>{timeLeft.minutes}</div>
-                <div style={countdownLabelStyle}>Minutes</div>
-            </div>
-            <div style={countdownBoxStyle}>
-                <div style={countdownValueStyle}>{timeLeft.seconds}</div>
-                <div style={countdownLabelStyle}>Seconds</div>
-            </div>
-        </div>
-    );
+        );
 };
 
 const StakingCard = ({
@@ -1580,38 +1608,53 @@ const Shop = ({ language }) => {
     const products = [
         {
             id: 1,
-            name: 'Product 1',
-            price: 19.99,
+            name: language === "EN" ? 'High Quality Whitelist' : "高質量白名單",
+            price: 0.99,
             image: 'product1.jpg',
-            description: 'Description of Product 1...',
+            description:
+                language === "EN"
+                    ? 'Priority Purchase for High-Quality Collaboration Projects'
+                    : '高品質合作項目優先購買',
         },
         {
             id: 2,
-            name: 'Product 2',
-            price: 24.99,
+            name: language === "EN" ? 'Redeem 1020 Token' : "兌換 1020 代幣",
+            price: 1.99,
             image: 'product2.jpg',
-            description: 'Description of Product 2...',
+            description:
+                language === "EN"
+                    ? "High Net Worth 1020 Tokens"
+                    : "高淨值1020代幣",
         },
         {
             id: 3,
-            name: 'Product 3',
-            price: 29.99,
+            name: language === "EN" ? 'Redeem NFT' : "兌換 NFT",
+            price: 2.99,
             image: 'product2.jpg',
-            description: 'Description of Product 2...',
+            description:
+                language === "EN"
+                    ? "Commemorative Collectible NFT"
+                    : "紀念珍藏級NFT",
         },
         {
             id: 4,
-            name: 'Product 4',
-            price: 34.99,
+            name: language === "EN" ? 'Shareholder Meeting' : "股東大會",
+            price: 3.99,
             image: 'product2.jpg',
-            description: 'Description of Product 2...',
+            description:
+                language === "EN"
+                    ? "Ecological Development Research Investment Equity"
+                    : "生態建設投研股權",
         },
         {
             id: 5,
-            name: 'Product 5',
-            price: 39.99,
+            name: language === "EN" ? 'Stay tuned' : "敬請期待",
+            price: 999.99,
             image: 'product2.jpg',
-            description: 'Description of Product 2...',
+            description:
+                language === "EN"
+                    ? "More Ecological Benefits Under Construction"
+                    : "更多生態福利建設中",
         },
         // Add more products...
     ];

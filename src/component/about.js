@@ -453,8 +453,10 @@ const Content1 = ({ language }) => {
     )
 }
 
-const Content2 = ({ language }) => {
-    const CA = "";
+const Content2 = ({ language, _1020CA }) => {
+    const JNYCA = "0x1E83D06E17CAE34415BeA30116aC755456131020"
+    const JNYLink = `https://pancakeswap.finance/swap?outputCurrency=${JNYCA}`
+    const CA = _1020CA;
     const link = `https://pancakeswap.finance/swap?outputCurrency=${CA}`
 
     const LeftColumn = [
@@ -471,7 +473,7 @@ const Content2 = ({ language }) => {
                     style={{
                         display: 'flex', flexWrap: 'wrap', justifyContent: 'center',
                     }}>
-                    <h3 style={{
+                    <h5 style={{
                         color: '#A017D7', fontWeight: 'bolder',
                         wordBreak: 'break-all',
                         padding: '20px',
@@ -490,7 +492,7 @@ const Content2 = ({ language }) => {
                             <br />
                             {CA}
                         </p>
-                    </h3>
+                    </h5>
 
                     <a
                         href={link}
@@ -519,6 +521,58 @@ const Content2 = ({ language }) => {
                         </button>
                     </a>
                 </div>
+                {/* <div className="elementor-element elementor-element-33e5fbe2 elementor-widget elementor-widget-heading" data-id="33e5fbe2" data-element_type="widget" data-widget_type="heading.default"
+                    style={{
+                        display: 'flex', flexWrap: 'wrap', justifyContent: 'center',
+                    }}>
+                    <h3 style={{
+                        color: '#A017D7', fontWeight: 'bolder',
+                        wordBreak: 'break-all',
+                        padding: '20px',
+                    }}>
+                        JNY
+                        {
+                            language === "EN"
+                                ? " CA : "
+                                : " 合約 : "
+                        }
+                        <br />
+                        <p style={{
+                            paddingLeft: '20px',
+                            color: 'gray'
+                        }}>
+                            <br />
+                            {JNYCA}
+                        </p>
+                    </h3>
+
+                    <a
+                        href={JNYLink}
+                        style={{
+                            fontWeight: 'bolder',
+                            color: 'rgb(83,0,117)'
+                        }}>
+
+                        <button className='box' style={{
+                            width: '15vw',
+                            height: '10vh',
+                            minWidth: '280px',
+                            minHeight: '50px',
+                            borderRadius: '20px',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            justifyContent: 'center',
+                            alignItems: 'center',
+                            margin: '20px',
+                        }}>
+                            {
+                                language === "EN"
+                                    ? "Buy 1020 On PancakeSwap"
+                                    : "在 PancakeSwap 購買 1020"
+                            }
+                        </button>
+                    </a>
+                </div> */}
                 {/* <div style={{ display: 'flex', flexWrap: 'wrap' }}>
                     <div className="elementor-column elementor-col-50 elementor-top-column elementor-element elementor-element-5d9ad543" data-id="5d9ad543" data-element_type="column"
                         style={{
@@ -1210,7 +1264,16 @@ const Marquee = ({ content, speed }) => {
     );
 };
 
-const Staking = ({ defaultAccount, language }) => {
+const Staking = ({
+    defaultAccount,
+    language,
+    stakingCA,
+    lpStakingCA,
+    jnyCA,
+    _1020CA,
+    _1020LPCA,
+    pointCA
+}) => {
 
     const [provider, setProvider] = useState(null);
     const [signer, setSigner] = useState(null);
@@ -1240,14 +1303,14 @@ const Staking = ({ defaultAccount, language }) => {
     const [earnedPoint, setEarnedPoint] = useState(null);
 
     //質押合約
-    const StakingCA = "0xF96407a0ecd34E36345Ee43a35a48AC4C2Fe5Ea7";
-    const LPStakingCA = "0xF96407a0ecd34E36345Ee43a35a48AC4C2Fe5Ea7"
+    const StakingCA = stakingCA;
+    const LPStakingCA = lpStakingCA;
 
     //代幣合約
-    const JNYCA = "0x2BDF6DDbfEc9781aAbee00D7e028D3efcCaD473d";
-    const CA_1020 = "0x9fb6CbC7e1651237Bc1BD22c2F96BDa6D762673a"
-    const LP_1020 = "0x9fb6CbC7e1651237Bc1BD22c2F96BDa6D762673a"
-    const PointCA = "0x9fb6CbC7e1651237Bc1BD22c2F96BDa6D762673a"
+    const JNYCA = jnyCA;
+    const CA_1020 = _1020CA
+    const LP_1020 = _1020LPCA
+    const PointCA = pointCA
 
     const parseAndTruncate = (amount, afterDeciaml) => {
         const parsedAmount = parseFloat(amount);
@@ -1364,7 +1427,7 @@ const Staking = ({ defaultAccount, language }) => {
                 fatherTokenName={"1020LP"}
                 sonTokenName={"Point"}
                 language={language}
-                contract={contract}
+                contract={lpStakingContract}
                 defaultAccount={defaultAccount}
                 fatherContract={_1020LPContract}
                 provider={provider}
@@ -1489,8 +1552,16 @@ const About = () => {
         console.log(value)
     }
 
+    const CAs = {
+        stakingCA: '0xF96407a0ecd34E36345Ee43a35a48AC4C2Fe5Ea7',
+        lpStakingCA: '0xF96407a0ecd34E36345Ee43a35a48AC4C2Fe5Ea7',
+        JNYCA: '0x2BDF6DDbfEc9781aAbee00D7e028D3efcCaD473d',
+        _1020CA: '0x9fb6CbC7e1651237Bc1BD22c2F96BDa6D762673a',
+        _1020LPCA: '0x9fb6CbC7e1651237Bc1BD22c2F96BDa6D762673a',
+        PointCA: '0x9fb6CbC7e1651237Bc1BD22c2F96BDa6D762673a'
+    }
+
     const stakingCenterText = language === "EN" ? "Staking Center" : "質押中心";
-    const pointShopText = language === "EN" ? "Points Shop" : "積分商城";
     return (
         <div style={{ backgroundColor: '#FDF8FF' }}>
             <Navbar setLan={languageHandler} defaultAccountChange={handleDefaultAccountChange} />
@@ -1498,13 +1569,21 @@ const About = () => {
             <div data-elementor-type="wp-page" data-elementor-id={177} className="elementor elementor-177">
                 <Hero language={language} />
                 <Content1 language={language} />
-                <Content2 language={language} />
+                <Content2 language={language} _1020CA={CAs._1020CA} />
 
                 <Marquee
                     content={stakingCenterText}
                     speed={10}
                 />
-                <Staking defaultAccount={defaultAccount} language={language} />
+                <Staking
+                    defaultAccount={defaultAccount} language={language}
+                    stakingCA={CAs.stakingCA}
+                    lpStakingCA={CAs.lpStakingCA}
+                    JNYCA={CAs.JNYCA}
+                    _1020CA={CAs._1020CA}
+                    _1020LPCA={CAs._1020LPCA}
+                    PointCA={CAs.PointCA}
+                />
 
                 <Marquee
                     content={null}

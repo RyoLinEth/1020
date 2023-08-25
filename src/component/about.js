@@ -1370,8 +1370,8 @@ const Staking = ({
     const [earnedPoint, setEarnedPoint] = useState(null);
 
     //  Claimed
-    const [hasBeenClaimdReward, setHasBeenClaimed] = useState(0);
-    const [pointHasBeenClaimedReward, setPointHasBeenClaimedReward] = useState(0);
+    const [hasBeenClaimdReward, setHasBeenClaimed] = useState(null);
+    const [pointHasBeenClaimedReward, setPointHasBeenClaimedReward] = useState(null);
 
     //質押合約
     const StakingCA = stakingCA;
@@ -1483,15 +1483,16 @@ const Staking = ({
             const tempUserId = await tempContract._usersId(defaultAccount)
             const tempGetUserById = await tempContract.getUserById(tempUserId);
             const formattedReward = ethers.utils.formatUnits(`${tempGetUserById.hasBeenClaimdReward}`, tempDecimal1020)
-            if (tempGetUserById.userAddr === defaultAccount)
+            if (tempGetUserById.userAddr.toLowerCase() === defaultAccount.toLowerCase())
                 setHasBeenClaimed(parseAndTruncate(formattedReward, 5))
             else
                 setHasBeenClaimed(0)
+
             //  已領取的 Point 數量
             const tempLpStakingUserId = await tempLPStakingContract._usersId(defaultAccount)
             const tempLpGetUserById = await tempLPStakingContract.getUserById(tempLpStakingUserId);
             const formattedPointReward = ethers.utils.formatUnits(`${tempLpGetUserById.hasBeenClaimdReward}`, tempDecimalPoint)
-            if (tempLpGetUserById.userAddr === defaultAccount)
+            if (tempLpGetUserById.userAddr.toLowerCase() === defaultAccount.toLowerCase())
                 setPointHasBeenClaimedReward(parseAndTruncate(formattedPointReward, 9))
             else
                 setPointHasBeenClaimedReward(0)

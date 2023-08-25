@@ -758,7 +758,11 @@ const StakingCard = ({
     sonGained,
     provider,
     isSuccess,
-    isAreaOpen
+    isAreaOpen,
+    Phase,
+    startBlock,
+    bonusEndBlock,
+    hasBeenClaimdReward,
 }) => {
 
     const [inputValue, setInputValue] = useState(''); // 初始化狀態為空字符串
@@ -792,7 +796,7 @@ const StakingCard = ({
 
     const handleClaim = async () => {
         try {
-            const result = await contract.deposit(0, defaultInviter);
+            const result = await contract.withdraw(0);
             provider
                 .getTransaction(result.hash)
                 .then((tx) => {
@@ -894,6 +898,13 @@ const StakingCard = ({
                 borderRadius: '20px'
             }}>
                 <div>
+                    <h3 style={{ textAlign: 'center' }}>
+                        {
+                            language === "EN"
+                                ? `Phase ${Phase}`
+                                : `第 ${Phase} 期`
+                        }
+                    </h3>
                     <h4 style={{ textAlign: 'center' }}>
 
                         {
@@ -916,6 +927,9 @@ const StakingCard = ({
                         fatherHolding={fatherBalance}
                         fatherStaked={fatherStaked}
                         sonGained={sonGained}
+                        startBlock={startBlock}
+                        bonusEndBlock={bonusEndBlock}
+                        hasBeenClaimdReward={hasBeenClaimdReward}
                     />
                     <div style={{
                         display: 'flex',
@@ -937,7 +951,8 @@ const StakingCard = ({
                             style={{
                                 marginLeft: '20px',
                                 marginRight: '20px',
-                                width: '100px'
+                                minWidth: '150px',
+                                fontSize: '10px'
                             }}
                         />
                         {fatherTokenName}
@@ -1039,6 +1054,8 @@ const StakingCard = ({
                                 fatherHolding={fatherBalance}
                                 fatherStaked={fatherStaked}
                                 sonGained={sonGained}
+                                startBlock={startBlock}
+                                bonusEndBlock={bonusEndBlock}
                             />
                             <div style={{
                                 display: 'flex',
@@ -1103,8 +1120,16 @@ const TableComponent = ({
     language,
     fatherHolding,
     fatherStaked,
-    sonGained
+    sonGained,
+    startBlock,
+    bonusEndBlock,
+    hasBeenClaimdReward
 }) => {
+    const BlockchainTimestampConverter = ({ timestamp }) => {
+        // 將區塊鍊的時間戳轉換為正式的時間
+        const formattedTime = new Date(timestamp * 1000).toLocaleString();
+        return (<span>{formattedTime}</span>)
+    };
     return (
         <div style={{ display: 'flex', flexDirection: 'column' }}>
             <table style={{ border: '1px solid black', width: '100%', borderRadius: '10px' }}>
@@ -1144,6 +1169,41 @@ const TableComponent = ({
                             {sonTokenName}
                         </td>
                         <td style={{ border: '1px solid black', padding: '8px' }}>{sonGained}</td>
+                    </tr>
+                    <tr>
+                        <td style={{ border: '1px solid black', padding: '8px' }}>
+                            {
+                                language === "EN"
+                                    ? "Claimed "
+                                    : "已領取的 "
+                            }
+                            {sonTokenName}
+                        </td>
+                        <td style={{ border: '1px solid black', padding: '8px' }}>{hasBeenClaimdReward}</td>
+                    </tr>
+                    <tr>
+                        <td style={{ border: '1px solid black', padding: '8px' }}>
+                            {
+                                language === "EN"
+                                    ? "Pool Start Time "
+                                    : "礦池開始時間 "
+                            }
+                        </td>
+                        <td style={{ border: '1px solid black', padding: '8px' }}>
+                            <BlockchainTimestampConverter timestamp={startBlock} />
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style={{ border: '1px solid black', padding: '8px' }}>
+                            {
+                                language === "EN"
+                                    ? "Pool End Time "
+                                    : "礦池結束時間"
+                            }
+                        </td>
+                        <td style={{ border: '1px solid black', padding: '8px' }}>
+                            <BlockchainTimestampConverter timestamp={bonusEndBlock} />
+                        </td>
                     </tr>
                 </tbody>
             </table>
@@ -1282,6 +1342,12 @@ const Staking = ({
     const [contract, setContract] = useState(null);
     const [lpStakingContract, setLpStakingContract] = useState(null);
 
+    //  Time
+    const [contractStartBlock, setContractStartBlock] = useState(null);
+    const [contractEndBlock, setContractEndBlock] = useState(null);
+    const [lpContractStartBlock, setLpContractStartBlock] = useState(null);
+    const [lpContractEndBlock, setLpContractEndBlock] = useState(null);
+
     //  Token Contract
     const [jnyContract, setJNYContract] = useState(null);
     const [_1020Contract, set1020Contract] = useState(null);
@@ -1301,6 +1367,10 @@ const Staking = ({
 
     const [pointDeicmals, setPointDecimals] = useState(null);
     const [earnedPoint, setEarnedPoint] = useState(null);
+
+    //  Claimed
+    const [hasBeenClaimdReward, setHasBeenClaimed] = useState(0);
+    const [pointHasBeenClaimedReward, setPointHasBeenClaimedReward] = useState(0);
 
     //質押合約
     const StakingCA = stakingCA;
@@ -1358,6 +1428,7 @@ const Staking = ({
             setPointDecimals(tempDecimalPoint);
 
             //  質押 JNY 獲得 1020 資料
+
             //  持有JNY
             const tempBalanceJNY = await tempJNYContract.balanceOf(defaultAccount);
             const formattedBalance = ethers.utils.formatUnits(`${tempBalanceJNY}`, tempDecimalJNY);
@@ -1373,6 +1444,8 @@ const Staking = ({
             const formattedGained1020 = ethers.utils.formatUnits(`${tempGained1020}`, tempDecimal1020);
             setEarned1020(parseAndTruncate(formattedGained1020, 5));
 
+            //  質押 1020LP 獲得 Points 資料
+
             //  持有 1020LP
             const temp1020LPBalance = await temp1020Contract.balanceOf(defaultAccount);
             const formatted1020LPBalance = ethers.utils.formatUnits(`${temp1020LPBalance}`, tempDecimal1020LP);
@@ -1387,6 +1460,41 @@ const Staking = ({
             const tempGainedPoint = await tempLPStakingContract.pendingReward(defaultAccount);
             const formattedGainedPoint = ethers.utils.formatUnits(`${tempGainedPoint}`, tempDecimalPoint);
             setEarnedPoint(parseAndTruncate(formattedGainedPoint, 9));
+
+            //  質押合約 開始結束時間
+            const tempContractStartBlock = await tempContract.startBlock();
+            const formattedContractStartBlock = ethers.utils.formatUnits(`${tempContractStartBlock}`, 0);
+            setContractStartBlock(formattedContractStartBlock)
+
+            const tempContractEndBlock = await tempContract.bonusEndBlock();
+            const formattedContractEndBlock = ethers.utils.formatUnits(`${tempContractEndBlock}`, 0);
+            setContractEndBlock(formattedContractEndBlock)
+
+            const tempLpContractStartBlock = await tempLPStakingContract.startBlock();
+            const formattedLpContractStartBlock = ethers.utils.formatUnits(`${tempLpContractStartBlock}`, 0);
+            setLpContractStartBlock(formattedLpContractStartBlock)
+
+            const tempLpContractEndBlock = await tempLPStakingContract.bonusEndBlock();
+            const formattedLpContractEndBlock = ethers.utils.formatUnits(`${tempLpContractEndBlock}`, 0);
+            setLpContractEndBlock(formattedLpContractEndBlock)
+
+            //  已領取的 1020 數量
+            const tempUserId = await tempContract._usersId(defaultAccount)
+            const tempGetUserById = await tempContract.getUserById(tempUserId);
+            const formattedReward = ethers.utils.formatUnits(`${tempGetUserById.hasBeenClaimdReward}`, tempDecimal1020)
+            if (tempGetUserById.userAddr === defaultAccount)
+                setHasBeenClaimed(parseAndTruncate(formattedReward, 5))
+            else
+                setHasBeenClaimed(0)
+            //  已領取的 Point 數量
+            const tempLpStakingUserId = await tempLPStakingContract._usersId(defaultAccount)
+            const tempLpGetUserById = await tempLPStakingContract.getUserById(tempLpStakingUserId);
+            const formattedPointReward = ethers.utils.formatUnits(`${tempLpGetUserById.hasBeenClaimdReward}`, tempDecimalPoint)
+            if (tempLpGetUserById.userAddr === defaultAccount)
+                setPointHasBeenClaimedReward(parseAndTruncate(formattedPointReward, 9))
+            else
+                setPointHasBeenClaimedReward(0)
+
         } catch (err) {
             console.log(err)
         }
@@ -1422,6 +1530,10 @@ const Staking = ({
                 sonGained={earned1020}
                 isSuccess={handleIsTxOnChain}
                 isAreaOpen={true}
+                Phase={1}
+                startBlock={contractStartBlock}
+                bonusEndBlock={contractEndBlock}
+                hasBeenClaimdReward={hasBeenClaimdReward}
             />
             <StakingCard
                 fatherTokenName={"1020LP"}
@@ -1437,6 +1549,9 @@ const Staking = ({
                 sonGained={earnedPoint}
                 isSuccess={handleIsTxOnChain}
                 isAreaOpen={false}
+                Phase={2}
+                startBlock={lpContractStartBlock}
+                bonusEndBlock={lpContractEndBlock}
             />
         </section>
     )

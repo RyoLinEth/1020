@@ -1553,12 +1553,19 @@ const About = () => {
     }
 
     const CAs = {
-        stakingCA: '0xF96407a0ecd34E36345Ee43a35a48AC4C2Fe5Ea7',
+        stakingCA: '0x7845a2515F499A89Eb60C7e7000F0D2E9C074697',
+        JNYCA: '0xBBF05F794398fa4100DCf3c95F0995A448afBd7a',
+        _1020CA: '0x89877Bfd3891EF0e1073e7E0272058D6DAf3fd5c',
+
         lpStakingCA: '0xF96407a0ecd34E36345Ee43a35a48AC4C2Fe5Ea7',
-        JNYCA: '0x2BDF6DDbfEc9781aAbee00D7e028D3efcCaD473d',
-        _1020CA: '0x9fb6CbC7e1651237Bc1BD22c2F96BDa6D762673a',
         _1020LPCA: '0x9fb6CbC7e1651237Bc1BD22c2F96BDa6D762673a',
         PointCA: '0x9fb6CbC7e1651237Bc1BD22c2F96BDa6D762673a'
+        // stakingCA: '0xF96407a0ecd34E36345Ee43a35a48AC4C2Fe5Ea7',
+        // lpStakingCA: '0xF96407a0ecd34E36345Ee43a35a48AC4C2Fe5Ea7',
+        // JNYCA: '0x2BDF6DDbfEc9781aAbee00D7e028D3efcCaD473d',
+        // _1020CA: '0x9fb6CbC7e1651237Bc1BD22c2F96BDa6D762673a',
+        // _1020LPCA: '0x9fb6CbC7e1651237Bc1BD22c2F96BDa6D762673a',
+        // PointCA: '0x9fb6CbC7e1651237Bc1BD22c2F96BDa6D762673a'
     }
 
     const stakingCenterText = language === "EN" ? "Staking Center" : "質押中心";

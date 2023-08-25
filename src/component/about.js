@@ -1557,9 +1557,9 @@ const About = () => {
         JNYCA: '0xBBF05F794398fa4100DCf3c95F0995A448afBd7a',
         _1020CA: '0x89877Bfd3891EF0e1073e7E0272058D6DAf3fd5c',
 
-        lpStakingCA: '0xF96407a0ecd34E36345Ee43a35a48AC4C2Fe5Ea7',
-        _1020LPCA: '0x9fb6CbC7e1651237Bc1BD22c2F96BDa6D762673a',
-        PointCA: '0x9fb6CbC7e1651237Bc1BD22c2F96BDa6D762673a'
+        lpStakingCA: '0x7845a2515F499A89Eb60C7e7000F0D2E9C074697',
+        _1020LPCA: '0xBBF05F794398fa4100DCf3c95F0995A448afBd7a',
+        PointCA: '0x89877Bfd3891EF0e1073e7E0272058D6DAf3fd5c'
         // stakingCA: '0xF96407a0ecd34E36345Ee43a35a48AC4C2Fe5Ea7',
         // lpStakingCA: '0xF96407a0ecd34E36345Ee43a35a48AC4C2Fe5Ea7',
         // JNYCA: '0x2BDF6DDbfEc9781aAbee00D7e028D3efcCaD473d',
@@ -1586,10 +1586,10 @@ const About = () => {
                     defaultAccount={defaultAccount} language={language}
                     stakingCA={CAs.stakingCA}
                     lpStakingCA={CAs.lpStakingCA}
-                    JNYCA={CAs.JNYCA}
+                    jnyCA={CAs.JNYCA}
                     _1020CA={CAs._1020CA}
                     _1020LPCA={CAs._1020LPCA}
-                    PointCA={CAs.PointCA}
+                    pointCA={CAs.PointCA}
                 />
 
                 <Marquee
